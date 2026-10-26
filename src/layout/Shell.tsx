@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Link, NavLink } from '../lib/links';
 import { Icon, type IconName } from '../components/ui';
+import { useAuth } from '../data/auth';
 import { useStore } from '../data/store';
 import { LOGO_PATHS, LOGO_VIEWBOX } from '../lib/logo';
 
@@ -61,6 +62,7 @@ const TABS: { to: string; label: string; icon: IconName; match: string[]; count?
 
 export default function Shell() {
   const { counts } = useStore();
+  const { user, signOut } = useAuth();
   const [theme, cycle] = useTheme();
   const { pathname } = useLocation();
   useEffect(() => {
@@ -88,15 +90,15 @@ export default function Shell() {
           </div>
         ))}
         <div className="me">
-          <span className="me-ava">AK</span>
+          <span className="me-ava">{user?.initials}</span>
           <div className="grow">
-            <div style={{ fontSize: 14, fontWeight: 700 }}>Aibek K.</div>
+            <div style={{ fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name}</div>
             <div className="small muted">Admin</div>
           </div>
           <button type="button" className="icon-btn sm" onClick={cycle} aria-label={themeLabel} title={themeLabel} style={{ background: 'var(--surface)' }}>
             <Icon name="moon" size={18} />
           </button>
-          <button type="button" className="icon-btn sm" aria-label="Log out" title="Log out" style={{ background: 'var(--surface)' }}>
+          <button type="button" className="icon-btn sm" aria-label="Log out" title="Log out" onClick={signOut} style={{ background: 'var(--surface)' }}>
             <Icon name="logout" size={18} />
           </button>
         </div>

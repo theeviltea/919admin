@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Link } from '../lib/links';
-import { Card, Icon, Logo, PageHead, Segmented, TierBadge, Avatar, type IconName } from '../components/ui';
+import { useAuth } from '../data/auth';
+import { Card, Icon, IconButton, Logo, PageHead, Segmented, TierBadge, Avatar, type IconName } from '../components/ui';
 import { useStore } from '../data/store';
 
 function LineChart({ series, labels }: { series: { name: string; color: string; values: number[] }[]; labels: string[] }) {
@@ -85,6 +87,8 @@ function QueueRow({ to, icon, title, sub, n, tone }: { to: string; icon: IconNam
 export default function Overview() {
   const { metrics, counts, companies, vacancies, reports } = useStore();
   const [range, setRange] = useState<'7' | '30'>('30');
+  const { signOut } = useAuth();
+  const { cycleTheme, themeLabel } = useOutletContext<{ cycleTheme: () => void; themeLabel: string }>();
   const slice = (a: number[]) => (range === '7' ? a.slice(-7) : a);
   const labels = range === '7' ? ['17 Oct', '20 Oct', '23 Oct'] : metrics.signups.labels;
   const fieldMax = Math.max(...metrics.fields.map((f) => f[1]));
@@ -97,7 +101,15 @@ export default function Overview() {
       <PageHead
         title="Overview"
         sub="Monday, 26 October · platform activity"
-        right={<Segmented items={[{ key: '7', label: '7 days' }, { key: '30', label: '30 days' }]} value={range} onChange={setRange} />}
+        right={
+          <div className="row" style={{ gap: 8 }}>
+            <Segmented items={[{ key: '7', label: '7 days' }, { key: '30', label: '30 days' }]} value={range} onChange={setRange} />
+            <span className="hide-d row" style={{ gap: 8 }}>
+              <IconButton icon="moon" label={themeLabel} onClick={cycleTheme} />
+              <IconButton icon="logout" label="Log out" onClick={signOut} />
+            </span>
+          </div>
+        }
       />
       <div className="kpis">
         {metrics.kpis.map((k) => {

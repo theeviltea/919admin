@@ -1,7 +1,9 @@
 import { BrowserRouter, MemoryRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { DialogProvider } from './components/dialogs';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AuthProvider, useAuth } from './data/auth';
 import { StoreProvider } from './data/store';
+import Login from './pages/Login';
 import Shell from './layout/Shell';
 import { EmployerChecks, VacancyChecks } from './pages/Checks';
 import { CompanyDetail, RecruiterDetail, SeekerDetail, VacancyDetail } from './pages/Details';
@@ -12,7 +14,9 @@ import { ReportPage, Reports } from './pages/Reports';
 // The single-file preview runs inside the artifact viewer, which doesn't allow URL changes, so routing stays in memory.
 const Router = import.meta.env.MODE === 'preview' ? MemoryRouter : BrowserRouter;
 
-export default function App() {
+function Gate() {
+  const { user } = useAuth();
+  if (!user) return <Login />;
   return (
     <ErrorBoundary>
     <StoreProvider>
@@ -42,5 +46,13 @@ export default function App() {
       </Router>
     </StoreProvider>
     </ErrorBoundary>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Gate />
+    </AuthProvider>
   );
 }

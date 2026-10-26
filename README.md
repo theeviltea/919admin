@@ -20,7 +20,7 @@ Without `VITE_API_URL` the admin runs on mock data (`src/data/mock.ts`). With it
 - `POST /admin/:entity/:id/:action` — `approve | reject | request-changes | hide | show | block | unblock | pause | resume | close | take | resolve | warn | edit`, body `{ reason?, note?, patch? }`
 - `DELETE /admin/:entity/:id`
 
-Auth: bearer token from `localStorage["919admin.token"]`. The UI updates at once and rolls back if the request fails.
+Sign-in: for now any email and password open the admin (`src/data/auth.tsx`); the session is kept in browser storage when “Keep me signed in” is on. To check real credentials, call `POST /admin/auth/login` → `{ token, name }` in `signIn` and store the token under `localStorage["919admin.token"]`, which the API client sends as a bearer token. The UI updates at once and rolls back if the request fails.
 
 ## Sections
 

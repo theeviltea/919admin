@@ -1,5 +1,5 @@
 // Confirm / reason / type-to-confirm / edit dialogs, opened from anywhere with useDialogs().
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useStore } from '../data/store';
 import { Button, Icon, useEscape, type IconName } from './ui';
 
@@ -23,6 +23,10 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   const [ask, setAsk] = useState<Ask | null>(null);
   const [edit, setEdit] = useState<EditReq | null>(null);
   const store = useStore();
+  const open = !!ask || !!edit;
+  useEffect(() => {
+    document.body.classList.toggle('modal-open', open);
+  }, [open]);
   return (
     <Ctx.Provider value={{ ask: setAsk, edit: setEdit }}>
       {children}
