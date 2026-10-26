@@ -1,0 +1,138 @@
+// Admin domain types. Mirrors what the 919 backend returns to the admin API (see src/data/api.ts).
+
+export type Tier = 'free' | 'premium' | 'max';
+export type Frame = 'gold' | 'ocean' | 'neon';
+export type SeekerStatus = 'active' | 'hidden' | 'blocked';
+export type CompanyStatus = 'verified' | 'pending' | 'rejected' | 'blocked';
+export type VacancyStatus = 'live' | 'review' | 'changes' | 'paused' | 'closed' | 'rejected';
+export type ReportKind = 'message' | 'company' | 'person' | 'vacancy';
+export type ReportStatus = 'new' | 'progress' | 'closed';
+export type Check = { level: 'ok' | 'warn' | 'bad'; title: string; note: string };
+export type LogItem = { at: string; text: string };
+
+export type Seeker = {
+  id: string;
+  name: string;
+  photo: string;
+  tier: Tier;
+  frame?: Frame;
+  header?: string;
+  field: string;
+  role: string;
+  city: string;
+  age: number;
+  gender: 'Female' | 'Male';
+  completeness: number;
+  joined: string;
+  lastActive: string;
+  status: SeekerStatus;
+  phone: string;
+  email: string;
+  platform: string;
+  photos: string[];
+  videos: { title: string; duration: string; views: string; poster: string }[];
+  about: string;
+  languages: [string, string][];
+  details: [string, string][];
+  experience: { role: string; place: string; period: string }[];
+  education: { title: string; school: string; years: string }[];
+  links: { code: string; label: string; value: string }[];
+  stats: { views: string; applications: string; accepted: string; invites: string; chats: string };
+  plan?: { since: string; renews: string; payment: string };
+  reports: number;
+  log: LogItem[];
+};
+
+export type Recruiter = {
+  id: string;
+  name: string;
+  photo: string;
+  companyId: string;
+  role: 'Admin' | 'Recruiter';
+  title: string;
+  phone: string;
+  email: string;
+  since: string;
+  lastActive: string;
+  vacancies: number;
+  chats: number;
+  hires: number;
+  status: 'active' | 'blocked';
+};
+
+export type Company = {
+  id: string;
+  name: string;
+  initials: string;
+  color: string;
+  type: 'Company' | 'Private recruiter';
+  field: string;
+  city: string;
+  address: string;
+  plan: 'free' | 'premium';
+  status: CompanyStatus;
+  licence: string;
+  licenceExpires: string;
+  joined: string;
+  about: string;
+  cover: string;
+  photos: string[];
+  website: string;
+  instagram: string;
+  phone: string;
+  recruiterIds: string[];
+  stats: { posted: number; applicants: string; hires: number; replyTime: string };
+  checks?: Check[];
+  documents: { name: string; kind: 'pdf' | 'image'; note: string }[];
+  submitted?: string;
+  reports: number;
+  log: LogItem[];
+};
+
+export type Vacancy = {
+  id: string;
+  title: string;
+  companyId: string;
+  postedBy: string;
+  field: string;
+  pay: string;
+  payNote: string;
+  contract: string;
+  status: VacancyStatus;
+  urgent: boolean;
+  applicants: number;
+  views: string;
+  posted: string;
+  photos: string[];
+  facts: [string, string][];
+  description: string;
+  flagged?: string;
+  requirements: string[];
+  conditions: [string, string][];
+  checks?: Check[];
+  log: LogItem[];
+};
+
+export type Report = {
+  id: string;
+  kind: ReportKind;
+  status: ReportStatus;
+  reason: string;
+  text: string;
+  from: { name: string; photo?: string; initials?: string };
+  about: { name: string; sub: string; photo?: string; initials?: string; color?: string; link: string };
+  age: string;
+  chat?: { mine: boolean; text: string; time: string; reported?: boolean }[];
+  context?: string;
+  prior?: string;
+};
+
+export type Metrics = {
+  kpis: { key: string; label: string; value: string; delta: string; trend: 'up' | 'down' | 'neutral'; sub: string }[];
+  signups: { seekers: number[]; companies: number[]; labels: string[] };
+  funnel: { label: string; value: string; share: string; width: number }[];
+  fields: [string, number][];
+  plans: { free: number; premium: number; max: number; employerPremium: number };
+  revenue: { label: string; value: string }[];
+  cities: [string, number][];
+};
