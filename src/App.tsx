@@ -1,4 +1,4 @@
-import { BrowserRouter, HashRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { DialogProvider } from './components/dialogs';
 import { StoreProvider } from './data/store';
 import Shell from './layout/Shell';
@@ -8,8 +8,8 @@ import { Companies, Seekers, Vacancies } from './pages/Lists';
 import Overview from './pages/Overview';
 import { ReportPage, Reports } from './pages/Reports';
 
-// The single-file preview build has no server routing, so it uses hash URLs.
-const Router = import.meta.env.MODE === 'preview' ? HashRouter : BrowserRouter;
+// The single-file preview runs inside the artifact viewer, which doesn't allow URL changes, so routing stays in memory.
+const Router = import.meta.env.MODE === 'preview' ? MemoryRouter : BrowserRouter;
 
 export default function App() {
   return (

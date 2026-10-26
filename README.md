@@ -9,7 +9,7 @@ npm install
 npm run dev            # http://localhost:5173
 npm run lint && npm run typecheck
 npm run build          # dist/ — static SPA, serve with a fallback to index.html
-npm run build:preview  # dist-preview/index.html — one self-contained file with hash routing
+npm run build:preview  # dist-preview/index.html — one self-contained file, in-memory routing
 ```
 
 ## Backend
