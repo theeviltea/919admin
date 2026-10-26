@@ -1,6 +1,7 @@
 // Desktop sidebar + mobile tab bar around every admin page.
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink } from '../lib/links';
 import { Icon, type IconName } from '../components/ui';
 import { useStore } from '../data/store';
 import { LOGO_PATHS, LOGO_VIEWBOX } from '../lib/logo';

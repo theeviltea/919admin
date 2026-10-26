@@ -1,5 +1,5 @@
 // Moderation queues: new employers and vacancies waiting for a decision.
-import { Link } from 'react-router-dom';
+import { Link } from '../lib/links';
 import { useCompanyActions, useVacancyActions } from '../components/actions';
 import { PhoneSwitch } from '../components/domain';
 import { Button, Empty, Icon, Logo, PageHead, Status } from '../components/ui';

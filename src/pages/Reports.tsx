@@ -1,6 +1,7 @@
 // Reports: tabs by subject (all / messages / companies / people / vacancies), list + detail.
 import { useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link } from '../lib/links';
 import { useDialogs } from '../components/dialogs';
 import { ReportStatusChip } from '../components/domain';
 import { Avatar, Button, Card, Chip, Empty, Icon, Logo, PageHead, Segmented, useIsMobile } from '../components/ui';

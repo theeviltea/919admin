@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '../lib/links';
 import { Card, Icon, Logo, PageHead, Segmented, TierBadge, Avatar, type IconName } from '../components/ui';
 import { useStore } from '../data/store';
 

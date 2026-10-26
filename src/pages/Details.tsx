@@ -1,5 +1,6 @@
 // Full-content detail pages with management tools in the top toolbar.
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { Link } from '../lib/links';
 import { useCompanyActions, useRecruiterActions, useSeekerActions, useVacancyActions } from '../components/actions';
 import { CompanyStatusChip, SeekerStatusChip, VacancyStatusChip } from '../components/domain';
 import { Audit, Avatar, Button, Card, Checks, Empty, FRAMES, Gallery, Icon, KV, Logo, Status, Tags, TierBadge, Timeline, Toolbar, Verified, Videos } from '../components/ui';

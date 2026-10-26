@@ -1,6 +1,6 @@
 // Design-system atoms for the admin (same look as the 919 app components).
 import { useEffect, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '../lib/links';
 import icons from '../lib/icons.json';
 import type { Check, Frame, LogItem, Tier } from '../data/types';
 

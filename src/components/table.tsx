@@ -1,6 +1,7 @@
 // Desktop table that turns into a card list on phones. Optional row selection with a bulk-action bar.
 import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from '../lib/links';
 import { Checkbox, Empty, Pager, useIsMobile } from './ui';
 
 export type Column<T> = { label: string; render: (row: T) => ReactNode; width?: number | string; align?: 'right' };
@@ -42,17 +43,9 @@ export function DataTable<T extends { id: string }>({
     return (
       <div className="mlist">
         {rows.map((r) => (
-          <a
-            key={r.id}
-            href={href(r)}
-            className="mcard"
-            onClick={(e) => {
-              e.preventDefault();
-              nav(href(r));
-            }}
-          >
+          <Link key={r.id} to={href(r)} className="mcard">
             {mobile(r)}
-          </a>
+          </Link>
         ))}
         {total && <div className="small muted" style={{ textAlign: 'center', padding: 8 }}>Showing {rows.length} of {total}</div>}
       </div>
