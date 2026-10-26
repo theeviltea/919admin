@@ -2,8 +2,9 @@
 import { useParams } from 'react-router-dom';
 import { Link } from '../lib/links';
 import { useCompanyActions, useRecruiterActions, useSeekerActions, useVacancyActions } from '../components/actions';
-import { CompanyStatusChip, SeekerStatusChip, VacancyStatusChip } from '../components/domain';
+import { CompanyStatusChip, LicenceChip, SeekerStatusChip, VacancyStatusChip } from '../components/domain';
 import { Audit, Avatar, Button, Card, Checks, Empty, FRAMES, Gallery, Icon, KV, Logo, Status, Tags, TierBadge, Timeline, Toolbar, Verified, Videos } from '../components/ui';
+import { LicenceCard } from '../components/licence';
 import { useStore } from '../data/store';
 import type { Company, Vacancy } from '../data/types';
 
@@ -265,7 +266,7 @@ function CompanyBody({ c, review }: { c: Company; review: boolean }) {
             <div className="grow" style={{ paddingTop: 14, minWidth: 220 }}>
               <div className="row">
                 <span className="hero-name">{c.name}</span>
-                {c.status === 'verified' && <Verified />}
+                {c.licence.status === 'verified' && <Verified />}
               </div>
               <div className="row wrap muted" style={{ marginTop: 6, gap: 14, fontSize: 14 }}>
                 <span>
@@ -291,24 +292,7 @@ function CompanyBody({ c, review }: { c: Company; review: boolean }) {
             <Checks items={c.checks} />
           </Card>
         )}
-        {review && (
-          <Card title="Documents" count={c.documents.length}>
-            <div className="two">
-              {c.documents.map((d) => (
-                <div key={d.name} className="row" style={{ gap: 12, padding: 12, borderRadius: 16, background: 'var(--back)' }}>
-                  <span className="check-ic" style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--surface)', color: d.kind === 'pdf' ? 'var(--danger-text)' : 'var(--primary)' }}>
-                    <Icon name={d.kind === 'pdf' ? 'file' : 'image'} />
-                  </span>
-                  <span className="grow">
-                    <span className="t" style={{ fontSize: 14, fontWeight: 600, display: 'block' }}>{d.name}</span>
-                    <span className="small muted">{d.note}</span>
-                  </span>
-                  <Icon name="download" size={18} />
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
+        <LicenceCard c={c} />
         <Card title="About the company">
           <p className="para">{c.about}</p>
         </Card>
@@ -346,8 +330,7 @@ function CompanyBody({ c, review }: { c: Company; review: boolean }) {
           <KV
             rows={[
               ['ID', c.id.slice(1)],
-              ['Licence', c.licence],
-              ['Licence expires', c.licenceExpires],
+              ['Licence no.', c.licenceNo],
               ['Phone', c.phone],
               ['Website', c.website],
               ['Instagram', c.instagram],
@@ -382,8 +365,9 @@ export function CompanyDetail({ review = false }: { review?: boolean }) {
   const c = companies.find((x) => x.id === id);
   const base = review ? '/checks/employers' : '/companies';
   if (!c) return <NotFound what="Company" back={base} />;
-  const list = review ? companies.filter((x) => x.status === 'pending' || x.id === id) : companies;
+  const list = review ? companies.filter((x) => x.status === 'pending' || x.licence.status === 'review' || x.id === id) : companies;
   const pending = c.status === 'pending';
+  const licenceOnly = review && !pending && c.licence.status === 'review';
   return (
     <>
       <Toolbar
@@ -391,10 +375,27 @@ export function CompanyDetail({ review = false }: { review?: boolean }) {
         pos={neighbours(list, id, base)}
         lead={<Logo initials={c.initials} color={c.color} size={56} radius={16} />}
         title={c.name}
-        chips={<CompanyStatusChip s={c.status} />}
+        chips={
+          <>
+            <CompanyStatusChip s={c.status} />
+            <LicenceChip s={c.licence.status} />
+          </>
+        }
         sub={review && c.submitted ? `${c.type} · sent ${c.submitted}` : `${c.type} · ${c.field} · ${c.city} · ID ${c.id.slice(1)}`}
         actions={
-          pending ? (
+          licenceOnly ? (
+            <>
+              <Button icon="edit" onClick={() => a.edit(c)}>
+                Edit
+              </Button>
+              <Button kind="danger" icon="cancel" onClick={() => a.rejectLicence(c)}>
+                Reject licence
+              </Button>
+              <Button kind="primary" icon="verified" onClick={() => a.approveLicence(c)}>
+                Approve licence
+              </Button>
+            </>
+          ) : pending ? (
             <>
               <Button icon="edit" onClick={() => a.edit(c)}>
                 Edit
@@ -406,7 +407,7 @@ export function CompanyDetail({ review = false }: { review?: boolean }) {
                 Reject
               </Button>
               <Button kind="primary" icon="check" onClick={() => a.approve(c, base)}>
-                Verify
+                Approve company
               </Button>
             </>
           ) : (
@@ -419,7 +420,7 @@ export function CompanyDetail({ review = false }: { review?: boolean }) {
               </Button>
               {c.status === 'rejected' ? (
                 <Button kind="primary" icon="check" onClick={() => a.approve(c)}>
-                  Verify
+                  Approve company
                 </Button>
               ) : (
                 <Button icon="lock" onClick={() => a.block(c)}>
@@ -485,7 +486,7 @@ export function RecruiterDetail() {
                 <Link to={back} className="row" style={{ marginTop: 10, textDecoration: 'none', gap: 8 }}>
                   <Logo initials={c.initials} color={c.color} size={28} radius={8} />
                   <span style={{ fontWeight: 600 }}>{c.name}</span>
-                  {c.status === 'verified' && <Verified />}
+                  {c.licence.status === 'verified' && <Verified />}
                 </Link>
               )}
             </div>

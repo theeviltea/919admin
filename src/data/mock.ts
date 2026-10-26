@@ -118,23 +118,36 @@ export const recruiters: Recruiter[] = [
   { id: 'r55301', name: 'Olivia Grant', photo: photographer, companyId: 'c10901', role: 'Admin', title: 'Event manager', phone: '+971 50 778 2210', email: 'olivia@prestige-events.ae', since: '23 Oct 2026', lastActive: '2 h ago', vacancies: 0, chats: 0, hires: 0, status: 'active' },
 ];
 
-const doc = (expires = 'Licence.pdf'): Company['documents'] => [
-  { name: expires, kind: 'pdf', note: '2 pages' },
-  { name: 'Emirates ID.jpg', kind: 'image', note: 'representative' },
-];
+const fileOf = (name: string, pages = 2, size = '1.2 MB') => ({ name: `${name.replace(/[^A-Za-z]+/g, '_').replace(/_$/, '')}_trade_licence.pdf`, size, pages });
+/** Trade licences: verified ones give the badge in the app; 'review' ones wait in Employer checks. */
+const LICENCES: Record<string, Partial<Company['licence']>> = {
+  c10422: { status: 'verified', checkedAt: '12 Sep 2026', checkedBy: 'Dana S.' },
+  c10311: { status: 'verified', checkedAt: '4 Jan 2026', checkedBy: 'Aibek K.' },
+  c10507: { status: 'none' },
+  c10120: { status: 'verified', checkedAt: '9 Dec 2025', checkedBy: 'Dana S.' },
+  c10901: { status: 'review', sentAt: '2 h ago' },
+  c10655: { status: 'review', sentAt: '40 min ago' },
+  c10802: { status: 'none' },
+  c10777: { status: 'rejected', sentAt: '20 Oct', checkedAt: '20 Oct', checkedBy: 'Aibek K.', reason: 'Licence is unreadable: the photo is cut off and blurry. Upload all pages as a PDF.' },
+  c10433: { status: 'review', sentAt: '3 h ago' },
+  c10288: { status: 'verified', checkedAt: '3 Jun 2026', checkedBy: 'Dana S.' },
+  c10905: { status: 'review', sentAt: '5 h ago' },
+  c10906: { status: 'none' },
+  c10907: { status: 'review', sentAt: '1 d ago' },
+};
 const baseLog = (joined: string) => [{ at: joined.split(' ').slice(0, 2).join(' '), text: 'Account created' }];
 
 type CoSeed = [string, string, string, string, Company['type'], string, string, Company['plan'], Company['status'], string, number];
 const coSeeds: CoSeed[] = [
-  ['c10422', 'Skyline Hospitality', 'SH', '#3589F2', 'Company', 'Hospitality', 'Dubai', 'premium', 'verified', '12 Feb 2026', 41],
-  ['c10311', 'DIVES Holding', 'DH', '#0E1A2B', 'Company', 'Events', 'Dubai', 'premium', 'verified', '3 Jan 2026', 66],
-  ['c10507', 'ORZU Group', 'OG', '#7A3FD1', 'Company', 'Music', 'Dubai', 'free', 'verified', '27 Mar 2026', 8],
-  ['c10120', 'Atlantis The Palm', 'AP', '#00A3A3', 'Company', 'Hospitality', 'Dubai', 'premium', 'verified', '8 Dec 2025', 120],
+  ['c10422', 'Skyline Hospitality', 'SH', '#3589F2', 'Company', 'Hospitality', 'Dubai', 'premium', 'approved', '12 Feb 2026', 41],
+  ['c10311', 'DIVES Holding', 'DH', '#0E1A2B', 'Company', 'Events', 'Dubai', 'premium', 'approved', '3 Jan 2026', 66],
+  ['c10507', 'ORZU Group', 'OG', '#7A3FD1', 'Company', 'Music', 'Dubai', 'free', 'approved', '27 Mar 2026', 8],
+  ['c10120', 'Atlantis The Palm', 'AP', '#00A3A3', 'Company', 'Hospitality', 'Dubai', 'premium', 'approved', '8 Dec 2025', 120],
   ['c10901', 'Prestige Events', 'PE', '#FF8652', 'Company', 'Events', 'Abu Dhabi', 'free', 'pending', '23 Oct 2026', 0],
-  ['c10655', 'Azure Beach', 'AB', '#1F6FD9', 'Company', 'F&B', 'Dubai', 'free', 'verified', '4 Jul 2026', 5],
-  ['c10802', 'Sam Morris', 'SM', '#5E6670', 'Private recruiter', 'Events', 'Dubai', 'free', 'verified', '19 Sep 2026', 3],
+  ['c10655', 'Azure Beach', 'AB', '#1F6FD9', 'Company', 'F&B', 'Dubai', 'free', 'approved', '4 Jul 2026', 5],
+  ['c10802', 'Sam Morris', 'SM', '#5E6670', 'Private recruiter', 'Events', 'Dubai', 'free', 'approved', '19 Sep 2026', 3],
   ['c10777', 'Velocity Events', 'VE', '#E0123F', 'Company', 'Events', 'Dubai', 'free', 'rejected', '20 Oct 2026', 0],
-  ['c10433', 'Brew Lab', 'BL', '#8A5A2B', 'Company', 'F&B', 'Dubai', 'premium', 'verified', '15 May 2026', 14],
+  ['c10433', 'Brew Lab', 'BL', '#8A5A2B', 'Company', 'F&B', 'Dubai', 'premium', 'approved', '15 May 2026', 14],
   ['c10288', 'Coastline Events', 'CE', '#2C2140', 'Company', 'Events', 'Abu Dhabi', 'free', 'blocked', '2 Jun 2026', 2],
   ['c10905', 'Velvet Lounge DIFC', 'VL', '#2A2235', 'Company', 'Hospitality', 'Dubai', 'free', 'pending', '23 Oct 2026', 0],
   ['c10906', 'Ahmed Khalil', 'AK', '#5E6670', 'Private recruiter', 'Hospitality', 'Dubai', 'free', 'pending', '22 Oct 2026', 0],
@@ -151,8 +164,19 @@ export const companies: Company[] = coSeeds.map(([id, name, initials, color, typ
   address: city === 'Dubai' ? 'Bay Square 7, Business Bay, Dubai' : city === 'Abu Dhabi' ? 'Al Reem Island, Abu Dhabi' : 'Al Majaz, Sharjah',
   plan,
   status,
-  licence: type === 'Company' ? `CN-${3318204 + i * 70313} · ${city === 'Abu Dhabi' ? 'Abu Dhabi DED' : 'Dubai DED'}` : 'Emirates ID checked',
-  licenceExpires: '14 Mar 2027',
+  licenceNo: type === 'Company' ? `CN-${3318204 + i * 70313}` : 'Private recruiter',
+  licence: {
+    status: 'none',
+    ...LICENCES[id],
+    ...(LICENCES[id]?.status && LICENCES[id]?.status !== 'none'
+      ? {
+          file: fileOf(name, id === 'c10777' ? 1 : 2, id === 'c10777' ? '3.8 MB' : '1.2 MB'),
+          issuer: city === 'Abu Dhabi' ? 'Abu Dhabi DED' : city === 'Sharjah' ? 'Sharjah SEDD' : 'Dubai DET',
+          activity: field === 'Events' ? 'Event management services' : field === 'F&B' ? 'Restaurant and cafeteria' : field === 'Music' ? 'Entertainment services' : 'Hospitality services',
+          validUntil: id === 'c10777' ? '3 Mar 2026' : '14 Mar 2027',
+        }
+      : {}),
+  },
   joined,
   about:
     id === 'c10901'
@@ -170,13 +194,16 @@ export const companies: Company[] = coSeeds.map(([id, name, initials, color, typ
       ? [
           { level: 'ok', title: 'Licence number format', note: 'Matches the DED pattern' },
           { level: 'ok', title: 'Email domain', note: 'Same as the company website' },
-          ...(id === 'c10901' ? [{ level: 'warn' as const, title: 'Similar company exists', note: '“Prestige Event Management” · Dubai · verified 2025' }] : []),
+          ...(id === 'c10901' ? [{ level: 'warn' as const, title: 'Similar company exists', note: '“Prestige Event Management” · Dubai · approved 2025' }] : []),
         ]
       : undefined,
-  documents: doc(),
   submitted: status === 'pending' ? (id === 'c10901' ? '2 h ago' : id === 'c10905' ? '5 h ago' : '1 d ago') : undefined,
   reports: id === 'c10288' ? 3 : id === 'c10422' ? 1 : 0,
-  log: status === 'verified' ? [{ at: '1 Mar', text: 'Verified by Dana S.' }, ...baseLog(joined)] : baseLog(joined),
+  log: [
+    ...(LICENCES[id]?.status === 'verified' ? [{ at: LICENCES[id]!.checkedAt!.split(' ').slice(0, 2).join(' '), text: `Trade licence approved, verified badge on · ${LICENCES[id]!.checkedBy}` }] : []),
+    ...(status === 'approved' ? [{ at: '1 Mar', text: 'Account approved by Dana S.' }] : []),
+    ...baseLog(joined),
+  ],
 }));
 
 const V = (v: Partial<Vacancy> & Pick<Vacancy, 'id' | 'title' | 'companyId' | 'field' | 'pay' | 'contract' | 'status'>): Vacancy => ({

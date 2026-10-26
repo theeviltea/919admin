@@ -1,7 +1,7 @@
 // Directory lists: job seekers, companies, vacancies.
 import { useMemo, useState } from 'react';
 import { useSeekerActions } from '../components/actions';
-import { CompanyCell, CompanyStatusChip, PersonCell, PhoneSwitch, SeekerStatusChip, VacancyStatusChip } from '../components/domain';
+import { CompanyCell, CompanyStatusChip, LicenceChip, PersonCell, PhoneSwitch, SeekerStatusChip, VacancyStatusChip } from '../components/domain';
 import { DataTable } from '../components/table';
 import { Avatar, Button, Chip, Completeness, Icon, Logo, PageHead, SearchBar, Status, TierBadge, Verified } from '../components/ui';
 import { useStore } from '../data/store';
@@ -101,19 +101,33 @@ export function Seekers() {
 export function Companies() {
   const { companies } = useStore();
   const [q, setQ] = useState('');
-  const [f, setF] = useState<'all' | 'verified' | 'pending' | 'premium' | 'private' | 'rejected' | 'blocked'>('all');
+  const [f, setF] = useState<'all' | 'badge' | 'licence' | 'nolicence' | 'pending' | 'premium' | 'private' | 'rejected' | 'blocked'>('all');
   const filters = [
     ['all', 'All', companies.length],
-    ['verified', 'Verified', companies.filter((c) => c.status === 'verified').length],
-    ['pending', 'On review', companies.filter((c) => c.status === 'pending').length],
+    ['badge', 'Verified badge', companies.filter((c) => c.licence.status === 'verified').length],
+    ['licence', 'Licence on review', companies.filter((c) => c.licence.status === 'review').length],
+    ['nolicence', 'No licence', companies.filter((c) => c.licence.status === 'none' || c.licence.status === 'rejected').length],
+    ['pending', 'New, on review', companies.filter((c) => c.status === 'pending').length],
     ['premium', 'Premium', companies.filter((c) => c.plan === 'premium').length],
     ['private', 'Private recruiters', companies.filter((c) => c.type === 'Private recruiter').length],
     ['rejected', 'Rejected', companies.filter((c) => c.status === 'rejected').length],
     ['blocked', 'Blocked', companies.filter((c) => c.status === 'blocked').length],
   ] as const;
   const rows = companies.filter((c) => {
-    const ok = f === 'all' || (f === 'premium' ? c.plan === 'premium' : f === 'private' ? c.type === 'Private recruiter' : c.status === f);
-    return ok && has(q, c.name, c.field, c.city, c.licence, c.id);
+    const ok =
+      f === 'all' ||
+      (f === 'premium'
+        ? c.plan === 'premium'
+        : f === 'private'
+          ? c.type === 'Private recruiter'
+          : f === 'badge'
+            ? c.licence.status === 'verified'
+            : f === 'licence'
+              ? c.licence.status === 'review'
+              : f === 'nolicence'
+                ? c.licence.status === 'none' || c.licence.status === 'rejected'
+                : c.status === f);
+    return ok && has(q, c.name, c.field, c.city, c.licenceNo, c.id);
   });
   return (
     <>
@@ -127,10 +141,11 @@ export function Companies() {
       <DataTable
         rows={rows}
         total={f === 'all' && !q ? '1 284' : undefined}
-        href={(c) => (c.status === 'pending' ? `/checks/employers/${c.id}` : `/companies/${c.id}`)}
+        href={(c) => (c.status === 'pending' || c.licence.status === 'review' ? `/checks/employers/${c.id}` : `/companies/${c.id}`)}
         columns={[
           { label: 'Company', render: (c) => <CompanyCell c={c} /> },
           { label: 'City', render: (c) => c.city },
+          { label: 'Badge', render: (c) => <LicenceChip s={c.licence.status} /> },
           { label: 'Plan', render: (c) => (c.plan === 'premium' ? <Status kind="premium">Premium</Status> : <span className="muted">Free</span>) },
           { label: 'Vacancies', render: (c) => c.stats.posted, align: 'right' },
           { label: 'Hires', render: (c) => c.stats.hires, align: 'right' },
@@ -152,14 +167,14 @@ export function Companies() {
             <div className="grow">
               <div className="row" style={{ gap: 6 }}>
                 <span className="cell-main">{c.name}</span>
-                {c.status === 'verified' && <Verified />}
+                {c.licence.status === 'verified' && <Verified />}
               </div>
               <div className="cell-sub">
                 {c.field} · {c.city} · {c.stats.posted} vacancies
               </div>
               <div className="row" style={{ marginTop: 6 }}>
-                <CompanyStatusChip s={c.status} />
-                {c.plan === 'premium' && <Status kind="premium">Premium</Status>}
+                <LicenceChip s={c.licence.status} />
+                {c.status !== 'approved' && <CompanyStatusChip s={c.status} />}
               </div>
             </div>
             <Icon name="chevron-right" size={18} />

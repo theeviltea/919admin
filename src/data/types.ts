@@ -3,7 +3,21 @@
 export type Tier = 'free' | 'premium' | 'max';
 export type Frame = 'gold' | 'ocean' | 'neon';
 export type SeekerStatus = 'active' | 'hidden' | 'blocked';
-export type CompanyStatus = 'verified' | 'pending' | 'rejected' | 'blocked';
+/** Account check (can the company post vacancies). The verified badge comes from the trade licence, see Licence. */
+export type CompanyStatus = 'approved' | 'pending' | 'rejected' | 'blocked';
+export type LicenceStatus = 'none' | 'review' | 'rejected' | 'verified';
+/** Trade licence PDF. Seen only in the admin; an approved licence gives the company the verified badge in the app. */
+export type Licence = {
+  status: LicenceStatus;
+  file?: { name: string; size: string; pages: number; url?: string };
+  sentAt?: string;
+  checkedAt?: string;
+  checkedBy?: string;
+  reason?: string;
+  issuer?: string;
+  activity?: string;
+  validUntil?: string;
+};
 export type VacancyStatus = 'live' | 'review' | 'changes' | 'paused' | 'closed' | 'rejected';
 export type ReportKind = 'message' | 'company' | 'person' | 'vacancy';
 export type ReportStatus = 'new' | 'progress' | 'closed';
@@ -71,8 +85,8 @@ export type Company = {
   address: string;
   plan: 'free' | 'premium';
   status: CompanyStatus;
-  licence: string;
-  licenceExpires: string;
+  licenceNo: string;
+  licence: Licence;
   joined: string;
   about: string;
   cover: string;
@@ -83,7 +97,6 @@ export type Company = {
   recruiterIds: string[];
   stats: { posted: number; applicants: string; hires: number; replyTime: string };
   checks?: Check[];
-  documents: { name: string; kind: 'pdf' | 'image'; note: string }[];
   submitted?: string;
   reports: number;
   log: LogItem[];

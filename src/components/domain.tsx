@@ -1,6 +1,6 @@
 // Domain-specific pieces shared by several pages: status chips, phone section switchers, person/company leads.
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { Company, CompanyStatus, ReportStatus, Seeker, SeekerStatus, VacancyStatus } from '../data/types';
+import type { Company, CompanyStatus, LicenceStatus, ReportStatus, Seeker, SeekerStatus, VacancyStatus } from '../data/types';
 import { useStore } from '../data/store';
 import { Avatar, Logo, Segmented, Status, TierBadge, Verified } from './ui';
 
@@ -11,7 +11,7 @@ export function SeekerStatusChip({ s }: { s: SeekerStatus }) {
 }
 
 export function CompanyStatusChip({ s }: { s: CompanyStatus }) {
-  if (s === 'verified') return <Status kind="success" icon="check">Verified</Status>;
+  if (s === 'approved') return <Status kind="success" icon="check">Approved</Status>;
   if (s === 'pending') return <Status kind="new" icon="clock">On review</Status>;
   if (s === 'rejected') return <Status kind="attention">Rejected</Status>;
   return <Status kind="danger" icon="lock">Blocked</Status>;
@@ -28,6 +28,14 @@ export function VacancyStatusChip({ s }: { s: VacancyStatus }) {
   };
   const [kind, label] = map[s];
   return <Status kind={kind}>{label}</Status>;
+}
+
+/** Trade licence state = the verified badge in the app. */
+export function LicenceChip({ s }: { s: LicenceStatus }) {
+  if (s === 'verified') return <Status kind="new" icon="verified">Verified badge</Status>;
+  if (s === 'review') return <Status kind="attention" icon="file">Licence on review</Status>;
+  if (s === 'rejected') return <Status kind="danger">Licence rejected</Status>;
+  return <Status kind="pending">No licence</Status>;
 }
 
 export function ReportStatusChip({ s }: { s: ReportStatus }) {
@@ -60,7 +68,7 @@ export function CompanyCell({ c, size = 40 }: { c: Company; size?: number }) {
       <div style={{ minWidth: 0 }}>
         <div className="row" style={{ gap: 6 }}>
           <span className="cell-main">{c.name}</span>
-          {c.status === 'verified' && <Verified />}
+          {c.licence.status === 'verified' && <Verified />}
         </div>
         <div className="cell-sub">
           {c.type} · {c.field}

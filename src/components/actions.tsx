@@ -6,6 +6,7 @@ import { useDialogs } from './dialogs';
 
 const PROFILE_REASONS = ['Fake profile or photos', 'Scam or asks for money', 'Rude or offensive behaviour', 'Under 18', 'Other'];
 const VACANCY_REJECT = ['Contact details in the text', 'Scam or asks for money', 'Pay or conditions are misleading', 'Not a real job', 'Prohibited work', 'Duplicate vacancy'];
+const LICENCE_REJECT = ['Licence has expired', 'Unreadable or pages are missing', 'Company name doesn’t match the licence', 'Not a trade licence', 'Other'];
 const COMPANY_REJECT = ['Licence unreadable or expired', 'Company data doesn’t match the licence', 'Copies another company', 'Not a real business', 'Other'];
 
 export function useSeekerActions() {
@@ -89,13 +90,33 @@ export function useCompanyActions() {
   const { ask, edit } = useDialogs();
   const nav = useNavigate();
   return {
-    approve: (c: Company, after?: string) =>
+    approveLicence: (c: Company) =>
       ask({
-        title: `Verify ${c.name}?`,
-        text: 'The company gets the verified badge and can publish vacancies. Its recruiters can start chats.',
+        title: `Give ${c.name} the verified badge?`,
+        text: 'The trade licence is approved. The badge appears next to the company name on its vacancies, company page and in chats, and the employer gets a notification.',
         icon: 'verified',
         tone: 'success',
-        confirm: 'Verify company',
+        confirm: 'Approve licence',
+        onConfirm: () => act.licence(c.id, 'approve'),
+      }),
+    rejectLicence: (c: Company) =>
+      ask({
+        title: 'Reject the trade licence?',
+        text: `${c.name} stays without the badge. The employer sees the reason and can upload a new PDF.`,
+        icon: 'cancel',
+        tone: 'danger',
+        reasons: LICENCE_REJECT,
+        note: { label: 'Note for the employer (optional)', placeholder: 'For example: the licence expired on 3 Mar 2026, upload the renewed one' },
+        confirm: 'Reject licence',
+        onConfirm: ({ reason, note }) => act.licence(c.id, 'reject', [reason, note].filter(Boolean).join('. ')),
+      }),
+    approve: (c: Company, after?: string) =>
+      ask({
+        title: `Approve ${c.name}?`,
+        text: 'The account is approved: the company can publish vacancies and its recruiters can start chats. The verified badge comes separately, from an approved trade licence.',
+        icon: 'check',
+        tone: 'success',
+        confirm: 'Approve company',
         onConfirm: () => {
           act.company(c.id, 'approve');
           if (after) nav(after);

@@ -344,3 +344,8 @@ body.modal-open { overflow: hidden; }
   .login-art { display: none; }
   .login-side { align-items: flex-start; padding-top: 56px; }
 }
+@media (max-width: 860px) {
+  .queue-actions { width: 100%; display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .queue-actions .btn { width: 100%; padding: 0 8px; font-size: 14px; gap: 6px; }
+  .toast { left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); transform: none; max-width: none; }
+}

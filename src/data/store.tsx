@@ -83,9 +83,9 @@ function useStoreValue() {
   const company = useCallback(
     (id: string, action: 'approve' | 'reject' | 'request-changes' | 'block' | 'unblock' | 'delete', note?: string) => {
       const name = state.companies.find((x) => x.id === id)?.name ?? 'Company';
-      const status: Record<string, CompanyStatus> = { approve: 'verified', reject: 'rejected', block: 'blocked', unblock: 'verified' };
+      const status: Record<string, CompanyStatus> = { approve: 'approved', reject: 'rejected', block: 'blocked', unblock: 'approved' };
       const labels: Record<string, [string, string]> = {
-        approve: ['Verified', `${name} is verified and can post vacancies`],
+        approve: ['Account approved', `${name} is approved and can post vacancies`],
         reject: ['Rejected', `${name} rejected, the employer got the reason`],
         'request-changes': ['Changes requested', `Request sent to ${name}`],
         block: ['Blocked', `${name} is blocked, its vacancies are hidden`],
@@ -117,6 +117,34 @@ function useStoreValue() {
         toastText,
         { note },
         action !== 'request-changes',
+      );
+    },
+    [run, state.companies],
+  );
+
+  /** Trade licence decision: approve gives the verified badge in the app, reject sends the reason to the employer. */
+  const licence = useCallback(
+    (id: string, action: 'approve' | 'reject', note?: string) => {
+      const name = state.companies.find((x) => x.id === id)?.name ?? 'Company';
+      run(
+        'companies',
+        id,
+        action === 'approve' ? 'approve-licence' : 'reject-licence',
+        (s) => ({
+          ...s,
+          companies: s.companies.map((x) =>
+            x.id === id
+              ? {
+                  ...x,
+                  licence: { ...x.licence, status: action === 'approve' ? 'verified' : 'rejected', checkedAt: 'Today', checkedBy: ME, reason: action === 'reject' ? note : undefined },
+                  log: [log(action === 'approve' ? 'Trade licence approved, verified badge on' : 'Trade licence rejected', note), ...x.log],
+                }
+              : x,
+          ),
+        }),
+        action === 'approve' ? `${name} got the verified badge` : `Licence rejected, ${name} got the reason`,
+        { note },
+        true,
       );
     },
     [run, state.companies],
@@ -216,14 +244,16 @@ function useStoreValue() {
 
   const counts = useMemo(
     () => ({
-      employers: state.companies.filter((c) => c.status === 'pending').length,
+      employers: state.companies.filter((c) => c.status === 'pending' || c.licence.status === 'review').length,
+      newCompanies: state.companies.filter((c) => c.status === 'pending').length,
+      licences: state.companies.filter((c) => c.licence.status === 'review').length,
       vacancies: state.vacancies.filter((v) => v.status === 'review').length,
       reports: state.reports.filter((r) => r.status === 'new').length,
     }),
     [state],
   );
 
-  return { ...state, counts, toast, dismissToast: () => setToast(null), notify, act: { seeker, company, recruiter, vacancy, report, edit } };
+  return { ...state, counts, toast, dismissToast: () => setToast(null), notify, act: { seeker, company, licence, recruiter, vacancy, report, edit } };
 }
 
 type Store = ReturnType<typeof useStoreValue>;

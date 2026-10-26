@@ -1,60 +1,126 @@
 // Moderation queues: new employers and vacancies waiting for a decision.
 import { Link } from '../lib/links';
 import { useCompanyActions, useVacancyActions } from '../components/actions';
-import { PhoneSwitch } from '../components/domain';
-import { Button, Empty, Icon, Logo, PageHead, Status } from '../components/ui';
+import { useState } from 'react';
+import { CompanyStatusChip, LicenceChip, PhoneSwitch } from '../components/domain';
+import { LicenceViewer, PdfTile } from '../components/licence';
+import { Button, Empty, Icon, Logo, PageHead, Segmented, Status } from '../components/ui';
 import { useStore } from '../data/store';
+import type { Company } from '../data/types';
 
 export function EmployerChecks() {
-  const { companies, recruiters } = useStore();
+  const { companies, recruiters, counts } = useStore();
   const a = useCompanyActions();
+  const [tab, setTab] = useState<'new' | 'licences'>(() => (counts.newCompanies ? 'new' : 'licences'));
+  const [viewer, setViewer] = useState<Company | null>(null);
   const queue = companies.filter((c) => c.status === 'pending');
+  const licences = companies.filter((c) => c.licence.status === 'review');
   return (
     <>
-      <PageHead title="Employer checks" sub={queue.length ? `${queue.length} waiting · we answer within 24 hours` : 'Queue is empty'} />
+      <PageHead
+        title="Employer checks"
+        sub={counts.employers ? `${queue.length} new companies · ${licences.length} trade licences · we answer within 24 hours` : 'Queue is empty'}
+      />
       <PhoneSwitch group="checks" />
-      {!queue.length && (
-        <div className="table">
-          <Empty icon="check-double" title="All employers are checked" text="New companies appear here after they send a licence." />
-        </div>
-      )}
-      <div className="mlist">
-        {queue.map((c) => {
-          const owner = recruiters.find((r) => r.companyId === c.id);
-          const warn = c.checks?.some((x) => x.level !== 'ok');
-          return (
-            <div key={c.id} className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-              <Link to={`/checks/employers/${c.id}`} className="row grow" style={{ gap: 14, textDecoration: 'none', minWidth: 260 }}>
-                <Logo initials={c.initials} color={c.color} size={56} radius={16} />
-                <div className="grow">
-                  <div className="row wrap" style={{ gap: 8 }}>
-                    <span style={{ fontSize: 17, fontWeight: 700 }}>{c.name}</span>
-                    {warn ? <Status kind="attention" icon="alert-circle">Needs a look</Status> : <Status kind="success" icon="check">Checks passed</Status>}
-                  </div>
-                  <div className="cell-sub" style={{ marginTop: 4 }}>
-                    {c.type} · {c.field} · {c.city} · {c.licence}
-                  </div>
-                  <div className="small light" style={{ marginTop: 4 }}>
-                    Sent {c.submitted}
-                    {owner ? ` by ${owner.name}, ${owner.title.toLowerCase()}` : ''}
+      <Segmented
+        items={[
+          { key: 'new', label: 'New companies', count: queue.length },
+          { key: 'licences', label: 'Trade licences', count: licences.length },
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
+      {tab === 'new' ? (
+        <>
+          {!queue.length && (
+            <div className="table">
+              <Empty icon="check-double" title="All new companies are checked" text="Companies appear here right after sign-up." />
+            </div>
+          )}
+          <div className="mlist">
+            {queue.map((c) => {
+              const owner = recruiters.find((r) => r.companyId === c.id);
+              const warn = c.checks?.some((x) => x.level !== 'ok');
+              return (
+                <div key={c.id} className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                  <Link to={`/checks/employers/${c.id}`} className="row grow" style={{ gap: 14, textDecoration: 'none', minWidth: 260 }}>
+                    <Logo initials={c.initials} color={c.color} size={56} radius={16} />
+                    <div className="grow">
+                      <div className="row wrap" style={{ gap: 8 }}>
+                        <span style={{ fontSize: 17, fontWeight: 700 }}>{c.name}</span>
+                        {warn ? <Status kind="attention" icon="alert-circle">Needs a look</Status> : <Status kind="success" icon="check">Checks passed</Status>}
+                        <LicenceChip s={c.licence.status} />
+                      </div>
+                      <div className="cell-sub" style={{ marginTop: 4 }}>
+                        {c.type} · {c.field} · {c.city} · {c.licenceNo}
+                      </div>
+                      <div className="small light" style={{ marginTop: 4 }}>
+                        Sent {c.submitted}
+                        {owner ? ` by ${owner.name}, ${owner.title.toLowerCase()}` : ''}
+                      </div>
+                    </div>
+                  </Link>
+                  <div className="row queue-actions" style={{ gap: 8 }}>
+                    <Button kind="secondary" icon="cancel" onClick={() => a.reject(c)}>
+                      Reject
+                    </Button>
+                    <Button kind="primary" icon="check" onClick={() => a.approve(c)}>
+                      Approve
+                    </Button>
+                    <Button kind="tonal" to={`/checks/employers/${c.id}`}>
+                      Open
+                    </Button>
                   </div>
                 </div>
-              </Link>
-              <div className="row" style={{ gap: 8 }}>
-                <Button kind="secondary" icon="cancel" onClick={() => a.reject(c)}>
-                  Reject
-                </Button>
-                <Button kind="primary" icon="check" onClick={() => a.approve(c)}>
-                  Verify
-                </Button>
-                <Button kind="tonal" to={`/checks/employers/${c.id}`}>
-                  Open
-                </Button>
-              </div>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <>
+          {!licences.length && (
+            <div className="table">
+              <Empty icon="verified" title="No trade licences to check" text="When a company uploads its trade licence, it appears here. Approved licences give the verified badge." />
             </div>
-          );
-        })}
-      </div>
+          )}
+          <div className="mlist">
+            {licences.map((c) => (
+              <div key={c.id} className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                <Link to={`/checks/employers/${c.id}`} className="row grow" style={{ gap: 14, textDecoration: 'none', minWidth: 260 }}>
+                  <Logo initials={c.initials} color={c.color} size={56} radius={16} />
+                  <div className="grow">
+                    <div className="row wrap" style={{ gap: 8 }}>
+                      <span style={{ fontSize: 17, fontWeight: 700 }}>{c.name}</span>
+                      <CompanyStatusChip s={c.status} />
+                    </div>
+                    <div className="row" style={{ gap: 8, marginTop: 6 }}>
+                      <PdfTile size={28} />
+                      <span className="cell-sub" style={{ marginTop: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {c.licence.file?.name} · {c.licence.file?.size}
+                      </span>
+                    </div>
+                    <div className="small light" style={{ marginTop: 4 }}>
+                      {c.licenceNo} · sent {c.licence.sentAt}
+                    </div>
+                  </div>
+                </Link>
+                <div className="row queue-actions" style={{ gap: 8 }}>
+                  <Button kind="secondary" icon="view" onClick={() => setViewer(c)}>
+                    Open PDF
+                  </Button>
+                  <Button kind="danger" icon="cancel" onClick={() => a.rejectLicence(c)}>
+                    Reject
+                  </Button>
+                  <Button kind="primary" icon="verified" onClick={() => a.approveLicence(c)}>
+                    Approve
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {viewer && <LicenceViewer c={viewer} onClose={() => setViewer(null)} />}
     </>
   );
 }

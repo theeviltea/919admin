@@ -40,7 +40,9 @@ export type AdminAction =
   | 'resolve'
   | 'dismiss'
   | 'warn'
-  | 'edit';
+  | 'edit'
+  | 'approve-licence'
+  | 'reject-licence';
 
 export const api = {
   /** Initial snapshot for the admin. One call keeps the mock and real modes interchangeable. */
