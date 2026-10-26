@@ -1,5 +1,6 @@
 import { BrowserRouter, MemoryRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { DialogProvider } from './components/dialogs';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { StoreProvider } from './data/store';
 import Shell from './layout/Shell';
 import { EmployerChecks, VacancyChecks } from './pages/Checks';
@@ -13,6 +14,7 @@ const Router = import.meta.env.MODE === 'preview' ? MemoryRouter : BrowserRouter
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <StoreProvider>
       <Router>
         <DialogProvider>
@@ -39,5 +41,6 @@ export default function App() {
         </DialogProvider>
       </Router>
     </StoreProvider>
+    </ErrorBoundary>
   );
 }

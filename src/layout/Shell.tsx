@@ -63,7 +63,9 @@ export default function Shell() {
   const { counts } = useStore();
   const [theme, cycle] = useTheme();
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
   const themeLabel = theme === 'system' ? 'Theme: system' : theme === 'dark' ? 'Theme: dark' : 'Theme: light';
   return (
     <div className="shell">
