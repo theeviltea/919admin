@@ -354,3 +354,8 @@ body.modal-open { overflow: hidden; }
 .hires-kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 @media (max-width: 1280px) { .hires-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 860px) { .hires-kpis { grid-template-columns: 1fr 1fr; } }
+
+/* Available today */
+.avail-chip { flex: none; height: 26px; padding: 0 10px 0 8px; border-radius: 999px; background: var(--urgent); color: var(--on-urgent); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.avail-note { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 16px; background: var(--attention-back); color: var(--text-headline); font-size: 14px; line-height: 1.45; }
+.avail-note-ic { flex: none; width: 28px; height: 28px; border-radius: 8px; background: var(--urgent); color: var(--on-urgent); display: flex; align-items: center; justify-content: center; }

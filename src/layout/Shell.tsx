@@ -50,6 +50,7 @@ const NAV: NavItem[] = [
   { to: '/companies', label: 'Companies', icon: 'building' },
   { to: '/vacancies', label: 'Vacancies', icon: 'briefcase' },
   { to: '/hires', label: 'Hires', icon: 'check-double' },
+  { to: '/available', label: 'Available today', icon: 'flash' },
   { to: '/reports', label: 'Reports', icon: 'alert-circle', count: 'reports', group: 'Safety' },
 ];
 

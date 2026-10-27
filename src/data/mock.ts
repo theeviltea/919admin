@@ -13,7 +13,7 @@ import pinkSkirt from '../assets/people/f-pink-skirt.webp';
 import videographer from '../assets/people/f-videographer.webp';
 import yellowLips from '../assets/people/f-yellow-lips.webp';
 import yellowSuit from '../assets/people/f-yellow-suit.webp';
-import type { Company, Hire, Metrics, Recruiter, Report, Seeker, Vacancy } from './types';
+import type { Availability, Company, Hire, Metrics, Recruiter, Report, Seeker, Vacancy } from './types';
 
 export const img = { dubai1, dubai2, misc };
 
@@ -447,6 +447,17 @@ export const hires: Hire[] = [
   { id: 'h10', seekerId: 's35624', vacancyId: 'v88177', companyId: 'c10120', employer: 'deciding', seeker: 'none', updated: '21 Oct' },
 ];
 
+const HOUR = 3600e3;
+const t0 = Date.now();
+export const availability: Availability[] = [
+  { id: 'a1', seekerId: 's28611', when: 'Evening', endsAt: t0 + 22 * HOUR, views: 12, messages: 2 },
+  { id: 'a2', seekerId: 's41861', when: 'Any time', endsAt: t0 + 18 * HOUR, views: 31, messages: 5 },
+  { id: 'a3', seekerId: 's32438', when: 'Night', endsAt: t0 + 9 * HOUR, views: 17, messages: 3, extended: true },
+  { id: 'a4', seekerId: 's50955', when: 'Evening', endsAt: t0 + 5 * HOUR, views: 8, messages: 1 },
+  { id: 'a5', seekerId: 's19619', when: 'Afternoon', endsAt: t0 + 3 * HOUR, views: 6, messages: 0 },
+  { id: 'a6', seekerId: 's98628', when: 'Evening', endsAt: t0 + 47 * 60e3, views: 4, messages: 1, reports: 1 },
+];
+
 const signupsSeekers = [410, 452, 398, 520, 610, 575, 540, 480, 505, 590, 640, 700, 688, 612, 560, 598, 655, 720, 801, 760, 690, 705, 770, 842, 815, 760, 790, 860, 905, 880];
 export const metrics: Metrics = {
   kpis: [
@@ -494,6 +505,13 @@ export const metrics: Metrics = {
       { key: 'conversion', label: 'Accepted → hired', value: '27%', delta: '+1 pt', sub: 'confirmed by both' },
     ],
   },
+  avail: [
+    { key: 'now', label: 'Available now', value: '312', delta: '+9%', sub: 'in Dubai 214' },
+    { key: 'today', label: 'Turned on today', value: '148', delta: '+12%', sub: '62% Max or Premium' },
+    { key: 'extended', label: 'Extended', value: '41%', delta: '+6 pts', sub: 'after the 1-hour push' },
+    { key: 'messaged', label: 'Got a message', value: '37%', delta: '+4 pts', sub: 'within 24 hours' },
+    { key: 'hired', label: 'Hired from the tab', value: '26', delta: '+8', sub: 'confirmed, 30 days' },
+  ],
   revenue: [
     { label: 'Seeker Premium', value: '$2.3k' },
     { label: 'Seeker Max', value: '$2.0k' },

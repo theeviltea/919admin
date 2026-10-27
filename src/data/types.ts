@@ -157,6 +157,20 @@ export type Hire = {
 };
 export type HireKpi = { key: string; label: string; value: string; delta: string; sub: string };
 
+/** A job seeker with Available today on (24 hours; the app turns it off by itself). */
+export type Availability = {
+  id: string;
+  seekerId: string;
+  /** Part of the day they picked: "Evening", "Any time"… */
+  when: string;
+  /** End time, ms since epoch. Admins see the time left, employers don't. */
+  endsAt: number;
+  views: number;
+  messages: number;
+  extended?: boolean;
+  reports?: number;
+};
+
 export type Metrics = {
   kpis: { key: string; label: string; value: string; delta: string; trend: 'up' | 'down' | 'neutral'; sub: string }[];
   signups: { seekers: number[]; companies: number[]; labels: string[] };
@@ -167,4 +181,6 @@ export type Metrics = {
   cities: [string, number][];
   /** Hires page KPI row, per period. */
   hires: Record<'7' | '30', HireKpi[]>;
+  /** Available today page KPI row. */
+  avail: HireKpi[];
 };

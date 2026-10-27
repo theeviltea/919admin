@@ -2,17 +2,17 @@
 // calls the API (no-op in mock mode) and shows a toast; destructive actions can be undone from the toast.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { API_URL, api, type AdminAction, type Entity } from './api';
-import { companies, hires, metrics, recruiters, reports, seekers, vacancies } from './mock';
-import type { Company, Hire, CompanyStatus, Recruiter, Report, ReportStatus, Seeker, SeekerStatus, Vacancy, VacancyStatus } from './types';
+import { availability, companies, hires, metrics, recruiters, reports, seekers, vacancies } from './mock';
+import type { Availability, Company, Hire, CompanyStatus, Recruiter, Report, ReportStatus, Seeker, SeekerStatus, Vacancy, VacancyStatus } from './types';
 
-type State = { seekers: Seeker[]; companies: Company[]; recruiters: Recruiter[]; vacancies: Vacancy[]; reports: Report[]; hires: Hire[]; metrics: typeof metrics };
+type State = { seekers: Seeker[]; companies: Company[]; recruiters: Recruiter[]; vacancies: Vacancy[]; reports: Report[]; hires: Hire[]; availability: Availability[]; metrics: typeof metrics };
 type Toast = { id: number; text: string; undo?: () => void };
 
 const ME = 'Aibek K.';
 const now = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
 function useStoreValue() {
-  const [state, setState] = useState<State>({ seekers, companies, recruiters, vacancies, reports, hires, metrics });
+  const [state, setState] = useState<State>({ seekers, companies, recruiters, vacancies, reports, hires, availability, metrics });
   const [toast, setToast] = useState<Toast | null>(null);
   const timer = useRef<number>();
 
@@ -150,6 +150,27 @@ function useStoreValue() {
     [run, state.companies],
   );
 
+  /** Turn off someone's Available today (a report, a fake profile): they leave the Today tab at once. */
+  const availOff = useCallback(
+    (seekerId: string, note?: string) => {
+      const name = state.seekers.find((x) => x.id === seekerId)?.name ?? 'Profile';
+      run(
+        'seekers',
+        seekerId,
+        'avail-off',
+        (s) => ({
+          ...s,
+          availability: s.availability.filter((a) => a.seekerId !== seekerId),
+          seekers: s.seekers.map((x) => (x.id === seekerId ? { ...x, log: [log('Available today turned off', note), ...x.log] } : x)),
+        }),
+        `${name} is no longer available today`,
+        { note },
+        true,
+      );
+    },
+    [run, state.seekers],
+  );
+
   const recruiter = useCallback(
     (id: string, action: 'block' | 'unblock' | 'delete') => {
       const name = state.recruiters.find((x) => x.id === id)?.name ?? 'Recruiter';
@@ -253,7 +274,7 @@ function useStoreValue() {
     [state],
   );
 
-  return { ...state, counts, toast, dismissToast: () => setToast(null), notify, act: { seeker, company, licence, recruiter, vacancy, report, edit } };
+  return { ...state, counts, toast, dismissToast: () => setToast(null), notify, act: { seeker, company, licence, availOff, recruiter, vacancy, report, edit } };
 }
 
 type Store = ReturnType<typeof useStoreValue>;

@@ -85,7 +85,7 @@ function QueueRow({ to, icon, title, sub, n, tone }: { to: string; icon: IconNam
 }
 
 export default function Overview() {
-  const { metrics, counts, companies, vacancies, reports } = useStore();
+  const { metrics, counts, companies, vacancies, reports, availability } = useStore();
   const [range, setRange] = useState<'7' | '30'>('30');
   const { signOut } = useAuth();
   const { cycleTheme, themeLabel } = useOutletContext<{ cycleTheme: () => void; themeLabel: string }>();
@@ -151,6 +151,7 @@ export default function Overview() {
           <QueueRow to="/checks/employers" icon="building" title="Employer checks" sub="Licence and company data" n={counts.employers} tone="var(--primary)" />
           <QueueRow to="/checks/vacancies" icon="briefcase" title="Vacancy checks" sub="Before a vacancy goes live" n={counts.vacancies} tone="var(--primary)" />
           <QueueRow to="/reports" icon="alert-circle" title="New reports" sub="From people and companies" n={counts.reports} tone="var(--danger-text)" />
+          <QueueRow to="/available" icon="flash" title="Available today" sub="Job seekers who can start work today · live" n={availability.length} tone="var(--attention-text)" />
           <QueueRow to="/hires" icon="check-double" title="Hire confirmations" sub="Confirmed by employer and job seeker · 30 days" n={Number(metrics.hires['30'][0].value)} tone="var(--success-text)" />
           {newestPending.length > 0 && (
             <div className="col" style={{ gap: 8, paddingTop: 12 }}>
