@@ -2,17 +2,17 @@
 // calls the API (no-op in mock mode) and shows a toast; destructive actions can be undone from the toast.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { API_URL, api, type AdminAction, type Entity } from './api';
-import { companies, metrics, recruiters, reports, seekers, vacancies } from './mock';
-import type { Company, CompanyStatus, Recruiter, Report, ReportStatus, Seeker, SeekerStatus, Vacancy, VacancyStatus } from './types';
+import { companies, hires, metrics, recruiters, reports, seekers, vacancies } from './mock';
+import type { Company, Hire, CompanyStatus, Recruiter, Report, ReportStatus, Seeker, SeekerStatus, Vacancy, VacancyStatus } from './types';
 
-type State = { seekers: Seeker[]; companies: Company[]; recruiters: Recruiter[]; vacancies: Vacancy[]; reports: Report[]; metrics: typeof metrics };
+type State = { seekers: Seeker[]; companies: Company[]; recruiters: Recruiter[]; vacancies: Vacancy[]; reports: Report[]; hires: Hire[]; metrics: typeof metrics };
 type Toast = { id: number; text: string; undo?: () => void };
 
 const ME = 'Aibek K.';
 const now = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
 function useStoreValue() {
-  const [state, setState] = useState<State>({ seekers, companies, recruiters, vacancies, reports, metrics });
+  const [state, setState] = useState<State>({ seekers, companies, recruiters, vacancies, reports, hires, metrics });
   const [toast, setToast] = useState<Toast | null>(null);
   const timer = useRef<number>();
 

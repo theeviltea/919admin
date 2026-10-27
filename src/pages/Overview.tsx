@@ -151,6 +151,7 @@ export default function Overview() {
           <QueueRow to="/checks/employers" icon="building" title="Employer checks" sub="Licence and company data" n={counts.employers} tone="var(--primary)" />
           <QueueRow to="/checks/vacancies" icon="briefcase" title="Vacancy checks" sub="Before a vacancy goes live" n={counts.vacancies} tone="var(--primary)" />
           <QueueRow to="/reports" icon="alert-circle" title="New reports" sub="From people and companies" n={counts.reports} tone="var(--danger-text)" />
+          <QueueRow to="/hires" icon="check-double" title="Hire confirmations" sub="Confirmed by employer and job seeker · 30 days" n={Number(metrics.hires['30'][0].value)} tone="var(--success-text)" />
           {newestPending.length > 0 && (
             <div className="col" style={{ gap: 8, paddingTop: 12 }}>
               <span className="small muted" style={{ fontWeight: 600 }}>

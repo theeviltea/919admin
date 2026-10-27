@@ -8,6 +8,7 @@ import Shell from './layout/Shell';
 import { EmployerChecks, VacancyChecks } from './pages/Checks';
 import { CompanyDetail, RecruiterDetail, SeekerDetail, VacancyDetail } from './pages/Details';
 import { Companies, Seekers, Vacancies } from './pages/Lists';
+import Hires from './pages/Hires';
 import Overview from './pages/Overview';
 import { ReportPage, Reports } from './pages/Reports';
 
@@ -37,6 +38,7 @@ function Gate() {
               <Route path="recruiters/:id" element={<RecruiterDetail />} />
               <Route path="vacancies" element={<Vacancies />} />
               <Route path="vacancies/:id" element={<VacancyDetail />} />
+              <Route path="hires" element={<Hires />} />
               <Route path="reports" element={<Reports />} />
               <Route path="reports/:id" element={<ReportPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />

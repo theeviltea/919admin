@@ -1,6 +1,6 @@
 // Admin API client. Set VITE_API_URL (e.g. https://api.919.ae) to talk to the backend;
 // without it the admin runs on the mock data in ./mock.ts and every action resolves locally.
-import { companies, metrics, recruiters, reports, seekers, vacancies } from './mock';
+import { companies, hires, metrics, recruiters, reports, seekers, vacancies } from './mock';
 
 export const API_URL: string | undefined = import.meta.env.VITE_API_URL || undefined;
 const TOKEN_KEY = '919admin.token';
@@ -47,13 +47,14 @@ export type AdminAction =
 export const api = {
   /** Initial snapshot for the admin. One call keeps the mock and real modes interchangeable. */
   async bootstrap() {
-    if (!API_URL) return { seekers, companies, recruiters, vacancies, reports, metrics };
+    if (!API_URL) return { seekers, companies, recruiters, vacancies, reports, hires, metrics };
     return request<{
       seekers: typeof seekers;
       companies: typeof companies;
       recruiters: typeof recruiters;
       vacancies: typeof vacancies;
       reports: typeof reports;
+      hires: typeof hires;
       metrics: typeof metrics;
     }>('/admin/bootstrap');
   },

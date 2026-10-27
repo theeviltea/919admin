@@ -26,6 +26,10 @@ Sign-in: for now any email and password open the admin (`src/data/auth.tsx`); th
 
 Two separate checks. **Account** (`status`: pending → approved / rejected) lets a company post vacancies. **Trade licence** (`licence.status`: none → review → verified / rejected) is a PDF only admins see; `approve-licence` gives the company the verified badge in the app, `reject-licence` sends the reason (`note`) to the employer. Companies without an approved licence have no badge. The PDF opens from `licence.file.url`.
 
+## Hire confirmations
+
+After an application is accepted, the app asks the employer “Who did you hire?” (`hired | nofit | deciding`) and the job seeker “Did you get the job?” (`yes | no | process | other` + optional note). The admin reads them from `GET /admin/bootstrap` as `hires[]`: `{ id, seekerId, vacancyId, companyId, employer, seeker, seekerNote?, updated }` (`none` = no answer yet), plus KPI tiles in `metrics.hires['7' | '30']`. The result is derived in the admin: both positive = confirmed hire, one side only = only employer / only job seeker, positive vs negative = mismatch, otherwise waiting.
+
 ## Sections
 
 | Route | Page |
@@ -37,6 +41,7 @@ Two separate checks. **Account** (`status`: pending → approved / rejected) let
 | `/companies`, `/companies/:id` | Companies and company page |
 | `/recruiters/:id` | Recruiter page |
 | `/vacancies`, `/vacancies/:id` | All vacancies and vacancy page |
+| `/hires` | Hire confirmations from employers and job seekers |
 | `/reports`, `/reports/:id` | Reports: All, Messages, Companies, People, Vacancies |
 
 People photos are the licensed stock set only.

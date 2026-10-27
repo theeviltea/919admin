@@ -349,3 +349,8 @@ body.modal-open { overflow: hidden; }
   .queue-actions .btn { width: 100%; padding: 0 8px; font-size: 14px; gap: 6px; }
   .toast { left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); transform: none; max-width: none; }
 }
+
+/* ---------- hires ---------- */
+.hires-kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 1280px) { .hires-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 860px) { .hires-kpis { grid-template-columns: 1fr 1fr; } }

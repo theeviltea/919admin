@@ -140,6 +140,23 @@ export type Report = {
   prior?: string;
 };
 
+/** Hire confirmation after an accepted application: employer "Who did you hire?" + job seeker "Did you get the job?". */
+export type EmployerAnswer = 'hired' | 'nofit' | 'deciding' | 'none';
+export type SeekerAnswer = 'yes' | 'no' | 'process' | 'other' | 'none';
+export type HireResult = 'both' | 'emp' | 'seek' | 'mismatch' | 'wait';
+export type Hire = {
+  id: string;
+  seekerId: string;
+  vacancyId: string;
+  companyId: string;
+  employer: EmployerAnswer;
+  seeker: SeekerAnswer;
+  /** Job seeker's own words when they picked "Other answer". */
+  seekerNote?: string;
+  updated: string;
+};
+export type HireKpi = { key: string; label: string; value: string; delta: string; sub: string };
+
 export type Metrics = {
   kpis: { key: string; label: string; value: string; delta: string; trend: 'up' | 'down' | 'neutral'; sub: string }[];
   signups: { seekers: number[]; companies: number[]; labels: string[] };
@@ -148,4 +165,6 @@ export type Metrics = {
   plans: { free: number; premium: number; max: number; employerPremium: number };
   revenue: { label: string; value: string }[];
   cities: [string, number][];
+  /** Hires page KPI row, per period. */
+  hires: Record<'7' | '30', HireKpi[]>;
 };

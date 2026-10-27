@@ -13,7 +13,7 @@ import pinkSkirt from '../assets/people/f-pink-skirt.webp';
 import videographer from '../assets/people/f-videographer.webp';
 import yellowLips from '../assets/people/f-yellow-lips.webp';
 import yellowSuit from '../assets/people/f-yellow-suit.webp';
-import type { Company, Metrics, Recruiter, Report, Seeker, Vacancy } from './types';
+import type { Company, Hire, Metrics, Recruiter, Report, Seeker, Vacancy } from './types';
 
 export const img = { dubai1, dubai2, misc };
 
@@ -434,6 +434,19 @@ export const reports: Report[] = [
   },
 ];
 
+export const hires: Hire[] = [
+  { id: 'h1', seekerId: 's28611', vacancyId: 'v80117', companyId: 'c10422', employer: 'hired', seeker: 'yes', updated: 'Today, 18:42' },
+  { id: 'h2', seekerId: 's32438', vacancyId: 'v88102', companyId: 'c10507', employer: 'hired', seeker: 'yes', updated: 'Today, 12:10' },
+  { id: 'h3', seekerId: 's50955', vacancyId: 'v80117', companyId: 'c10422', employer: 'deciding', seeker: 'process', updated: 'Today, 18:42' },
+  { id: 'h4', seekerId: 's41861', vacancyId: 'v88001', companyId: 'c10311', employer: 'hired', seeker: 'none', updated: 'Yesterday' },
+  { id: 'h5', seekerId: 's19619', vacancyId: 'v88220', companyId: 'c10655', employer: 'none', seeker: 'yes', updated: 'Yesterday' },
+  { id: 'h6', seekerId: 's98628', vacancyId: 'v88177', companyId: 'c10120', employer: 'nofit', seeker: 'yes', updated: '25 Oct' },
+  { id: 'h7', seekerId: 's31744', vacancyId: 'v87801', companyId: 'c10433', employer: 'hired', seeker: 'other', seekerNote: '“Trial week first, contract from November”', updated: '24 Oct' },
+  { id: 'h8', seekerId: 's79486', vacancyId: 'v88214', companyId: 'c10777', employer: 'none', seeker: 'none', updated: '23 Oct' },
+  { id: 'h9', seekerId: 's44257', vacancyId: 'v88102', companyId: 'c10507', employer: 'hired', seeker: 'no', updated: '22 Oct' },
+  { id: 'h10', seekerId: 's35624', vacancyId: 'v88177', companyId: 'c10120', employer: 'deciding', seeker: 'none', updated: '21 Oct' },
+];
+
 const signupsSeekers = [410, 452, 398, 520, 610, 575, 540, 480, 505, 590, 640, 700, 688, 612, 560, 598, 655, 720, 801, 760, 690, 705, 770, 842, 815, 760, 790, 860, 905, 880];
 export const metrics: Metrics = {
   kpis: [
@@ -465,6 +478,22 @@ export const metrics: Metrics = {
     ['Service', 752],
   ],
   plans: { free: 17296, premium: 764, max: 342, employerPremium: 214 },
+  hires: {
+    '30': [
+      { key: 'confirmed', label: 'Confirmed hires', value: '214', delta: '+22%', sub: 'both said “hired”' },
+      { key: 'employer', label: 'Employer: hired', value: '268', delta: '+15%', sub: 'of 862 accepted' },
+      { key: 'seeker', label: 'Job seeker: got it', value: '241', delta: '+18%', sub: 'of 862 accepted' },
+      { key: 'answered', label: 'Answer rate', value: '63% · 48%', delta: '+5 pts', sub: 'employers · job seekers' },
+      { key: 'conversion', label: 'Accepted → hired', value: '31%', delta: '+3 pts', sub: 'confirmed by both' },
+    ],
+    '7': [
+      { key: 'confirmed', label: 'Confirmed hires', value: '58', delta: '+9%', sub: 'both said “hired”' },
+      { key: 'employer', label: 'Employer: hired', value: '71', delta: '+6%', sub: 'of 214 accepted' },
+      { key: 'seeker', label: 'Job seeker: got it', value: '64', delta: '+11%', sub: 'of 214 accepted' },
+      { key: 'answered', label: 'Answer rate', value: '61% · 45%', delta: '+2 pts', sub: 'employers · job seekers' },
+      { key: 'conversion', label: 'Accepted → hired', value: '27%', delta: '+1 pt', sub: 'confirmed by both' },
+    ],
+  },
   revenue: [
     { label: 'Seeker Premium', value: '$2.3k' },
     { label: 'Seeker Max', value: '$2.0k' },
