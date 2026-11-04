@@ -66,6 +66,21 @@ function LineChart({ series, labels }: { series: { name: string; color: string; 
   );
 }
 
+function QueueLink({ to, icon, title, sub }: { to: string; icon: IconName; title: string; sub: string }) {
+  return (
+    <Link to={to} className="list-row">
+      <span className="check-ic" style={{ width: 44, height: 44, borderRadius: 14, background: 'var(--primary-secondary)', color: 'var(--primary)' }}>
+        <Icon name={icon} />
+      </span>
+      <span className="grow">
+        <span className="t">{title}</span>
+        <span className="s">{sub}</span>
+      </span>
+      <Icon name="chevron-right" size={18} />
+    </Link>
+  );
+}
+
 function QueueRow({ to, icon, title, sub, n, tone }: { to: string; icon: IconName; title: string; sub: string; n: number; tone: string }) {
   return (
     <Link to={to} className="list-row">
@@ -169,6 +184,14 @@ export default function Overview() {
               ))}
             </div>
           )}
+        </Card>
+      </div>
+
+      {/* Phones have no sidebar: messaging lives here. */}
+      <div className="hide-d">
+        <Card title="Messaging" gap={0}>
+          <QueueLink to="/push" icon="notification" title="Push notifications" sub="To phones with notifications on" />
+          <QueueLink to="/email" icon="mail" title="Email campaigns" sub="To everyone with an address" />
         </Card>
       </div>
 

@@ -11,6 +11,7 @@ import { Companies, Seekers, Vacancies } from './pages/Lists';
 import Hires from './pages/Hires';
 import Available from './pages/Available';
 import Overview from './pages/Overview';
+import Broadcast from './pages/Broadcast';
 import { ReportPage, Reports } from './pages/Reports';
 
 // The single-file preview runs inside the artifact viewer, which doesn't allow URL changes, so routing stays in memory.
@@ -43,6 +44,8 @@ function Gate() {
               <Route path="available" element={<Available />} />
               <Route path="reports" element={<Reports />} />
               <Route path="reports/:id" element={<ReportPage />} />
+              <Route path="push" element={<Broadcast key="push" channel="push" />} />
+              <Route path="email" element={<Broadcast key="email" channel="email" />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

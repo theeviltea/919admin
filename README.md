@@ -30,6 +30,18 @@ Two separate checks. **Account** (`status`: pending → approved / rejected) let
 
 After an application is accepted, the app asks the employer “Who did you hire?” (`hired | nofit | deciding`) and the job seeker “Did you get the job?” (`yes | no | process | other` + optional note). The admin reads them from `GET /admin/bootstrap` as `hires[]`: `{ id, seekerId, vacancyId, companyId, employer, seeker, seekerNote?, updated }` (`none` = no answer yet), plus KPI tiles in `metrics.hires['7' | '30']`. The result is derived in the admin: both positive = confirmed hire, one side only = only employer / only job seeker, positive vs negative = mismatch, otherwise waiting.
 
+## Push notifications and email campaigns
+
+One screen for both channels (`src/pages/Broadcast.tsx`, data in `src/data/broadcast.ts`). The text is written in Russian and English; each person gets the language of their account, and if one language is empty everyone gets the other. Endpoints (`:channel` = `push | email`):
+
+- `POST /admin/:channel/reach` — body `Audience` `{ who: all|seekers|employers, app: both|old|new (push only), country, city, from, to (YYYY-MM-DD, UTC, inclusive), lang: any|ru|en }` → `{ match, reach }`: everyone who matches, and those with a push token / an email address.
+- `POST /admin/:channel/test` — `{ to, text, lang }`: `to` is an account email or ID for push, an address for email.
+- `POST /admin/:channel/campaigns` — `{ text: { ru?: {title, body}, en?: {title, body} }, audience }` → the new `Campaign`.
+- `GET /admin/:channel/campaigns` — history: `{ id, status: sending|done|failed, text, audience, total, sent, gone, failed, error?, by, started, ended? }`. `gone` = the token or address no longer exists (app removed, account closed); `failed` = delivery errors, with the last `error` message.
+- `GET /admin/email/server` — `{ configured, from }`. Letters go over SMTP (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`); until it's set, sending is disabled. The server adds a footer with an unsubscribe link in the person's language.
+
+Limits: push title 100 and text 500 characters; email subject 200 and text 20,000. In the letter a blank line starts a paragraph and links become clickable. Sending to everyone asks for confirmation and can't be called back.
+
 ## Sections
 
 | Route | Page |
@@ -43,5 +55,7 @@ After an application is accepted, the app asks the employer “Who did you hire?
 | `/vacancies`, `/vacancies/:id` | All vacancies and vacancy page |
 | `/hires` | Hire confirmations from employers and job seekers |
 | `/reports`, `/reports/:id` | Reports: All, Messages, Companies, People, Vacancies |
+| `/push` | Push notifications: message in RU/EN, audience, live reach, lock-screen preview, test to one phone, send to everyone, history |
+| `/email` | Email campaigns: the same flow for letters, plus the mail-server check |
 
 People photos are the licensed stock set only.

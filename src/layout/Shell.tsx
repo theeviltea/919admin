@@ -52,6 +52,8 @@ const NAV: NavItem[] = [
   { to: '/hires', label: 'Hires', icon: 'check-double' },
   { to: '/available', label: 'Available today', icon: 'flash' },
   { to: '/reports', label: 'Reports', icon: 'alert-circle', count: 'reports', group: 'Safety' },
+  { to: '/push', label: 'Push notifications', icon: 'notification', group: 'Messaging' },
+  { to: '/email', label: 'Email campaigns', icon: 'mail' },
 ];
 
 const TABS: { to: string; label: string; icon: IconName; match: string[]; count?: ('employers' | 'vacancies' | 'reports')[] }[] = [
