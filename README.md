@@ -30,6 +30,10 @@ Two separate checks. **Account** (`status`: pending → approved / rejected) let
 
 After an application is accepted, the app asks the employer “Who did you hire?” (`hired | nofit | deciding`) and the job seeker “Did you get the job?” (`yes | no | process | other` + optional note). The admin reads them from `GET /admin/bootstrap` as `hires[]`: `{ id, seekerId, vacancyId, companyId, employer, seeker, seekerNote?, updated }` (`none` = no answer yet), plus KPI tiles in `metrics.hires['7' | '30']`. The result is derived in the admin: both positive = confirmed hire, one side only = only employer / only job seeker, positive vs negative = mismatch, otherwise waiting.
 
+## Traffic and engagement (Overview)
+
+`metrics.traffic` in `GET /admin/bootstrap` (type `Traffic` in `src/data/types.ts`): KPI tiles (active today / week / 30 days, DAU/MAU, average session, web visits), 30 days of web visits and active people, platforms, traffic sources, countries, most viewed screens, weekly retention cohorts (day 1 / 7 / 30) and active people by hour (Dubai time). The **Online now** card polls `GET /admin/analytics/online` every 15 s → `{ total, ios, android, web, seekers, employers, perMinute[30] }` (people with the app or site open in the last 5 minutes).
+
 ## Push notifications and email campaigns
 
 One screen for both channels (`src/pages/Broadcast.tsx`, data in `src/data/broadcast.ts`). The text is written in Russian and English; each person gets the language of their account, and if one language is empty everyone gets the other. Endpoints (`:channel` = `push | email`):

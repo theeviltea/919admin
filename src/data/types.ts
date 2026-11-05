@@ -183,4 +183,22 @@ export type Metrics = {
   hires: Record<'7' | '30', HireKpi[]>;
   /** Available today page KPI row. */
   avail: HireKpi[];
+  /** Traffic and engagement on the Overview page. Web visits come from the site counter, app activity from the apps. */
+  traffic: Traffic;
+};
+
+export type Traffic = {
+  /** People with the app or site open in the last 5 minutes; refreshed live from GET /admin/analytics/online. */
+  online: { total: number; ios: number; android: number; web: number; seekers: number; employers: number; perMinute: number[] };
+  kpis: { key: string; label: string; value: string; delta: string; trend: 'up' | 'down' | 'neutral'; sub: string }[];
+  /** 30 days, oldest first. */
+  daily: { visits: number[]; active: number[]; labels: string[] };
+  platforms: [string, number][];
+  sources: [string, number][];
+  screens: { name: string; views: string; time: string }[];
+  /** Share of a weekly sign-up cohort that came back on day 1, 7 and 30. */
+  retention: { cohort: string; size: number; d1: number; d7: number | null; d30: number | null }[];
+  /** Average active users per hour of the day, Dubai time, 0–23. */
+  hours: number[];
+  countries: [string, number][];
 };

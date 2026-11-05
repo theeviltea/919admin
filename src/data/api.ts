@@ -60,6 +60,11 @@ export const api = {
       metrics: typeof metrics;
     }>('/admin/bootstrap');
   },
+  /** GET /admin/analytics/online — people online now; the Overview polls it every 15 s. */
+  async online() {
+    if (!API_URL) return null;
+    return request<typeof metrics.traffic.online>('/admin/analytics/online');
+  },
   /** POST /admin/:entity/:id/:action with an optional { reason, note, patch } body. */
   async act(entity: Entity, id: string, action: AdminAction, body?: Record<string, unknown>) {
     if (!API_URL) return;
