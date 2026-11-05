@@ -446,7 +446,6 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ---------- overview: traffic and engagement ---------- */
-.section-h { font-family: var(--display); font-weight: 600; font-size: 20px; margin-top: 8px; }
 .live-dot { width: 10px; height: 10px; border-radius: 50%; background: #34C759; box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.6); animation: live 1.8s ease-out infinite; }
 @keyframes live { to { box-shadow: 0 0 0 10px rgba(52, 199, 89, 0); } }
 .spark { display: flex; align-items: flex-end; gap: 3px; height: 72px; }
@@ -465,3 +464,19 @@ body.modal-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
 .delta { white-space: nowrap; }
 @media (max-width: 860px) { .ret { min-width: 46px; padding: 5px 6px; } .hours { height: 110px; gap: 2px; } }
+
+/* Overview sections: a header with a rule, then rows of cards of equal height */
+.ov-sec { display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 20px; }
+.ov-sec + .ov-sec, .kpis + .ov-sec { margin-top: 20px; }
+.ov-sec-h { display: flex; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--back-darker); }
+.ov-sec-h h2 { font-family: var(--display); font-weight: 600; font-size: 20px; }
+.ov-sec-h span { font-size: 14px; color: var(--text-body); }
+.ov-row { display: grid; gap: 12px; align-items: stretch; }
+.ov-row.r3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ov-row.r21 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+.ov-jump { display: flex; gap: 6px; margin-top: -8px; }
+.ov-jump button { height: 32px; padding: 0 12px; border: 1px solid var(--stroke); border-radius: 999px; background: var(--surface); color: var(--text-body); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.ov-jump button:hover { color: var(--primary); border-color: var(--primary); }
+@media (max-width: 1280px) { .ov-row.r3 { grid-template-columns: 1fr 1fr; } .ov-row.r3 > :last-child:nth-child(odd) { grid-column: 1 / -1; } }
+@media (max-width: 1080px) { .ov-row.r21 { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 860px) { .ov-row.r3 { grid-template-columns: minmax(0, 1fr); } .ov-sec-h { flex-direction: column; gap: 2px; } .ov-sec-h h2 { font-size: 18px; } .ov-jump { display: none; } }

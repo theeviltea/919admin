@@ -189,7 +189,7 @@ export type Metrics = {
 
 export type Traffic = {
   /** People with the app or site open in the last 5 minutes; refreshed live from GET /admin/analytics/online. */
-  online: { total: number; ios: number; android: number; web: number; seekers: number; employers: number; perMinute: number[] };
+  online: { total: number; ios: number; android: number; web: number; seekers: number; employers: number; perMinute: number[]; peakToday?: { value: number; at: string }; lastWeek?: number };
   kpis: { key: string; label: string; value: string; delta: string; trend: 'up' | 'down' | 'neutral'; sub: string }[];
   /** 30 days, oldest first. */
   daily: { visits: number[]; active: number[]; labels: string[] };

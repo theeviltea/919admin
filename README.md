@@ -32,7 +32,7 @@ After an application is accepted, the app asks the employer “Who did you hire?
 
 ## Traffic and engagement (Overview)
 
-`metrics.traffic` in `GET /admin/bootstrap` (type `Traffic` in `src/data/types.ts`): KPI tiles (active today / week / 30 days, DAU/MAU, average session, web visits), 30 days of web visits and active people, platforms, traffic sources, countries, most viewed screens, weekly retention cohorts (day 1 / 7 / 30) and active people by hour (Dubai time). The **Online now** card polls `GET /admin/analytics/online` every 15 s → `{ total, ios, android, web, seekers, employers, perMinute[30] }` (people with the app or site open in the last 5 minutes).
+`metrics.traffic` in `GET /admin/bootstrap` (type `Traffic` in `src/data/types.ts`): KPI tiles (active today / week / 30 days, DAU/MAU, average session, web visits), 30 days of web visits and active people, platforms, traffic sources, countries, most viewed screens, weekly retention cohorts (day 1 / 7 / 30) and active people by hour (Dubai time). The **Online now** card polls `GET /admin/analytics/online` every 15 s → `{ total, ios, android, web, seekers, employers, perMinute[30], peakToday?: { value, at }, lastWeek? }` (people with the app or site open in the last 5 minutes).
 
 ## Push notifications and email campaigns
 

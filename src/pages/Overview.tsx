@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { api, API_URL } from '../data/api';
 import type { Traffic } from '../data/types';
 import { useOutletContext } from 'react-router-dom';
@@ -87,6 +87,7 @@ function Online({ base }: { base: Traffic['online'] }) {
         const total = Math.max(200, p.total + d);
         const k = total / p.total;
         return {
+          ...p,
           total,
           ios: Math.round(p.ios * k),
           android: Math.round(p.android * k),
@@ -138,6 +139,30 @@ function Online({ base }: { base: Traffic['online'] }) {
           </span>
         ))}
       </div>
+      {(o.peakToday || o.lastWeek) && (
+        <div className="col" style={{ gap: 0, marginTop: 'auto' }}>
+          {o.peakToday && (
+            <div className="kv-row">
+              <span>Peak today</span>
+              <span>
+                {fmt(o.peakToday.value)} at {o.peakToday.at}
+              </span>
+            </div>
+          )}
+          {o.lastWeek && (
+            <div className="kv-row">
+              <span>Same time last week</span>
+              <span>
+                {fmt(o.lastWeek)}{' '}
+                <span className={`delta ${o.total >= o.lastWeek ? 'up' : 'down'}`}>
+                  {o.total >= o.lastWeek ? '+' : '−'}
+                  {Math.abs(Math.round((o.total / o.lastWeek - 1) * 100))}%
+                </span>
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
@@ -227,97 +252,6 @@ function Retention({ rows }: { rows: Traffic['retention'] }) {
   );
 }
 
-function TrafficSection({ t, range }: { t: Traffic; range: '7' | '30' }) {
-  const cut = (a: number[]) => (range === '7' ? a.slice(-7) : a);
-  const labels = range === '7' ? ['29 Oct', '1 Nov', '4 Nov'] : t.daily.labels;
-  const pc: [string, string][] = [
-    ['iOS app', 'var(--primary)'],
-    ['Android app', '#34C759'],
-    ['Web', '#FF8652'],
-  ];
-  return (
-    <>
-      <h2 className="section-h">Traffic and engagement</h2>
-      <div className="kpis">
-        {t.kpis.map((k) => (
-          <div key={k.key} className="kpi">
-            <span className="small muted" style={{ fontWeight: 600 }}>
-              {k.label}
-            </span>
-            <span className="kpi-v">{k.value}</span>
-            <span className="row" style={{ gap: 6 }}>
-              <span className={`delta ${k.trend}`}>{k.delta}</span>
-              <span className="small light">{k.sub}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-      <div className="dash">
-        <Card title="Visits and active people" right={<span className="small muted">{range === '7' ? 'Last 7 days' : 'Last 30 days'}</span>}>
-          <LineChart
-            label="Visits and active people per day"
-            labels={labels}
-            series={[
-              { name: 'Active people (apps and web)', color: 'var(--primary)', values: cut(t.daily.active) },
-              { name: 'Web visits', color: '#FF8652', values: cut(t.daily.visits) },
-            ]}
-          />
-        </Card>
-        <Online base={t.online} />
-      </div>
-      <div className="dash3">
-        <Card title="Where people come from" right={<span className="small muted">30 days</span>}>
-          <HBars rows={t.sources} />
-        </Card>
-        <Card title="Platforms" right={<span className="small muted">share of sessions</span>}>
-          <div className="stack-bar" style={{ height: 14 }}>
-            {t.platforms.map(([k, v], i) => (
-              <span key={k} style={{ width: `${v}%`, background: pc[i][1] }} />
-            ))}
-          </div>
-          <div className="col" style={{ gap: 0 }}>
-            {t.platforms.map(([k, v], i) => (
-              <div className="kv-row" key={k}>
-                <span className="row" style={{ gap: 8, color: 'var(--text-headline)', fontWeight: 600 }}>
-                  <i style={{ width: 10, height: 10, borderRadius: 3, background: pc[i][1], display: 'inline-block' }} />
-                  {k}
-                </span>
-                <span>{v}%</span>
-              </div>
-            ))}
-          </div>
-          <span className="small muted" style={{ marginTop: 4 }}>
-            Countries
-          </span>
-          <HBars rows={t.countries} color="#7A3FD1" />
-        </Card>
-        <Card title="Most viewed screens" right={<span className="small muted">today · avg time</span>} gap={0}>
-          {t.screens.map((s, i) => (
-            <div key={s.name} className="list-row">
-              <span className="rank">{i + 1}</span>
-              <span className="grow">
-                <span className="t">{s.name}</span>
-                <span className="s">{s.views} views</span>
-              </span>
-              <span className="small muted" style={{ whiteSpace: 'nowrap' }}>
-                {s.time}
-              </span>
-            </div>
-          ))}
-        </Card>
-      </div>
-      <div className="two">
-        <Card title="Activity by hour" right={<span className="small muted">Dubai time · 7-day average</span>}>
-          <Hours values={t.hours} />
-        </Card>
-        <Card title="Retention" right={<span className="small muted">came back after sign-up</span>}>
-          <Retention rows={t.retention} />
-        </Card>
-      </div>
-    </>
-  );
-}
-
 function QueueLink({ to, icon, title, sub }: { to: string; icon: IconName; title: string; sub: string }) {
   return (
     <Link to={to} className="list-row">
@@ -351,6 +285,25 @@ function QueueRow({ to, icon, title, sub, n, tone }: { to: string; icon: IconNam
   );
 }
 
+/** A titled block of the dashboard: one question per section, cards inside line up in rows of equal height. */
+function Section({ id, title, sub, children }: { id: string; title: string; sub: string; children: ReactNode }) {
+  return (
+    <section className="ov-sec" id={id} aria-labelledby={`${id}-h`}>
+      <header className="ov-sec-h">
+        <h2 id={`${id}-h`}>{title}</h2>
+        <span>{sub}</span>
+      </header>
+      {children}
+    </section>
+  );
+}
+
+const SECTIONS = [
+  { id: 'now', label: 'Right now' },
+  { id: 'growth', label: 'Growth' },
+  { id: 'traffic', label: 'Traffic' },
+];
+
 export default function Overview() {
   const { metrics, counts, companies, vacancies, reports, availability } = useStore();
   const [range, setRange] = useState<'7' | '30'>('30');
@@ -358,11 +311,21 @@ export default function Overview() {
   const { cycleTheme, themeLabel } = useOutletContext<{ cycleTheme: () => void; themeLabel: string }>();
   const slice = (a: number[]) => (range === '7' ? a.slice(-7) : a);
   const labels = range === '7' ? ['17 Oct', '20 Oct', '23 Oct'] : metrics.signups.labels;
+  const t = metrics.traffic;
+  const tLabels = range === '7' ? ['29 Oct', '1 Nov', '4 Nov'] : t.daily.labels;
+  const period = range === '7' ? 'Last 7 days' : 'Last 30 days';
   const fieldMax = Math.max(...metrics.fields.map((f) => f[1]));
   const cityTotal = metrics.cities.reduce((a, c) => a + c[1], 0);
   const p = metrics.plans;
   const newestPending = companies.filter((c) => c.status === 'pending').slice(0, 3);
   const kpiLinks: Record<string, string> = { seekers: '/seekers', companies: '/companies', vacancies: '/vacancies', queue: '/checks/employers' };
+  const pc: [string, string][] = [
+    ['iOS app', 'var(--primary)'],
+    ['Android app', '#34C759'],
+    ['Web', '#FF8652'],
+  ];
+  const jump = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const muted = (txt: string) => <span className="small muted">{txt}</span>;
   return (
     <>
       <PageHead
@@ -378,6 +341,13 @@ export default function Overview() {
           </div>
         }
       />
+      <nav className="ov-jump" aria-label="Overview sections">
+        {SECTIONS.map((x) => (
+          <button key={x.id} type="button" onClick={() => jump(x.id)}>
+            {x.label}
+          </button>
+        ))}
+      </nav>
       <div className="kpis">
         {metrics.kpis.map((k) => {
           const inner = (
@@ -404,148 +374,220 @@ export default function Overview() {
         })}
       </div>
 
-      <div className="dash">
-        <Card title="Sign-ups per day" right={<span className="small muted">{range === '7' ? 'Last 7 days' : 'Last 30 days'}</span>}>
-          <LineChart
-            labels={labels}
-            series={[
-              { name: 'Job seekers', color: 'var(--primary)', values: slice(metrics.signups.seekers) },
-              { name: 'Companies', color: '#FF8652', values: slice(metrics.signups.companies) },
-            ]}
-          />
-        </Card>
-        <Card title="Needs attention" gap={0}>
-          <QueueRow to="/checks/employers" icon="building" title="Employer checks" sub="Licence and company data" n={counts.employers} tone="var(--primary)" />
-          <QueueRow to="/checks/vacancies" icon="briefcase" title="Vacancy checks" sub="Before a vacancy goes live" n={counts.vacancies} tone="var(--primary)" />
-          <QueueRow to="/reports" icon="alert-circle" title="New reports" sub="From people and companies" n={counts.reports} tone="var(--danger-text)" />
-          <QueueRow to="/available" icon="flash" title="Available today" sub="Job seekers who can start work today · live" n={availability.length} tone="var(--attention-text)" />
-          <QueueRow to="/hires" icon="check-double" title="Hire confirmations" sub="Confirmed by employer and job seeker · 30 days" n={Number(metrics.hires['30'][0].value)} tone="var(--success-text)" />
-          {newestPending.length > 0 && (
-            <div className="col" style={{ gap: 8, paddingTop: 12 }}>
-              <span className="small muted" style={{ fontWeight: 600 }}>
-                Waiting longest
-              </span>
-              {newestPending.map((c) => (
-                <Link key={c.id} to={`/checks/employers/${c.id}`} className="row" style={{ textDecoration: 'none', gap: 10 }}>
-                  <Logo initials={c.initials} color={c.color} size={32} radius={10} />
-                  <span className="grow" style={{ fontWeight: 600 }}>
-                    {c.name}
-                  </span>
-                  <span className="small muted">{c.submitted}</span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </Card>
-      </div>
-
-      <TrafficSection t={metrics.traffic} range={range} />
-
-      {/* Phones have no sidebar: messaging lives here. */}
-      <div className="hide-d">
-        <Card title="Messaging" gap={0}>
-          <QueueLink to="/push" icon="notification" title="Push notifications" sub="To phones with notifications on" />
-          <QueueLink to="/email" icon="mail" title="Email campaigns" sub="To everyone with an address" />
-        </Card>
-      </div>
-
-      <div className="dash3">
-        <Card title="Hiring funnel" right={<span className="small muted">30 days</span>}>
-          {metrics.funnel.map((f) => (
-            <div className="funnel-step" key={f.label}>
-              <div className="row" style={{ justifyContent: 'space-between' }}>
+      <Section id="now" title="Right now" sub="What needs a decision today, and who is online">
+        <div className="ov-row r3">
+          <Card title="Needs attention" gap={0}>
+            <QueueRow to="/checks/employers" icon="building" title="Employer checks" sub="Licence and company data" n={counts.employers} tone="var(--primary)" />
+            <QueueRow to="/checks/vacancies" icon="briefcase" title="Vacancy checks" sub="Before a vacancy goes live" n={counts.vacancies} tone="var(--primary)" />
+            <QueueRow to="/reports" icon="alert-circle" title="New reports" sub="From people and companies" n={counts.reports} tone="var(--danger-text)" />
+            <QueueRow to="/available" icon="flash" title="Available today" sub="Can start work today · live" n={availability.length} tone="var(--attention-text)" />
+            <QueueRow to="/hires" icon="check-double" title="Hire confirmations" sub="Confirmed by both · 30 days" n={Number(metrics.hires['30'][0].value)} tone="var(--success-text)" />
+            {newestPending.length > 0 && (
+              <div className="col" style={{ gap: 8, paddingTop: 12 }}>
                 <span className="small muted" style={{ fontWeight: 600 }}>
-                  {f.label}
+                  Waiting longest
                 </span>
-                <span className="small muted">{f.share}</span>
+                {newestPending.map((c) => (
+                  <Link key={c.id} to={`/checks/employers/${c.id}`} className="row" style={{ textDecoration: 'none', gap: 10 }}>
+                    <Logo initials={c.initials} color={c.color} size={32} radius={10} />
+                    <span className="grow" style={{ fontWeight: 600 }}>
+                      {c.name}
+                    </span>
+                    <span className="small muted">{c.submitted}</span>
+                  </Link>
+                ))}
               </div>
-              <div className="funnel-bar" style={{ width: `${f.width}%`, opacity: 0.55 + f.width / 220 }}>
-                {f.value}
-              </div>
-            </div>
-          ))}
-        </Card>
-        <Card title="Live vacancies by field">
-          {metrics.fields.map(([f, v]) => (
-            <div className="hbar" key={f}>
-              <span style={{ width: 92, flex: 'none' }}>{f}</span>
-              <span className="track">
-                <span style={{ width: `${(v / fieldMax) * 100}%` }} />
-              </span>
-              <span className="strong" style={{ width: 48, textAlign: 'right' }}>
-                {v.toLocaleString('en').replace(',', ' ')}
-              </span>
-            </div>
-          ))}
-        </Card>
-        <Card title="Plans and revenue" right={<span className="small muted">{(((p.premium + p.max) / (p.free + p.premium + p.max)) * 100).toFixed(1)}% of seekers pay</span>}>
-          <div className="col" style={{ gap: 0 }}>
-            {[
-              [<span className="row" key="f"><span className="tier" style={{ width: 18, height: 18, background: 'var(--back-darker)' }} />Free</span>, p.free],
-              [<span className="row" key="p"><TierBadge tier="premium" />Seeker Premium</span>, p.premium],
-              [<span className="row" key="m"><TierBadge tier="max" />Seeker Max</span>, p.max],
-              [<span className="row" key="e"><Icon name="building" size={18} />Employer Premium</span>, p.employerPremium],
-            ].map(([k, v], i) => (
-              <div className="kv-row" key={i}>
-                <span style={{ color: 'var(--text-headline)', fontWeight: 600 }}>{k}</span>
-                <span>{Number(v).toLocaleString('en').replace(',', ' ')}</span>
-              </div>
+            )}
+          </Card>
+          <Online base={t.online} />
+          <Card title="Latest reports" right={<Link to="/reports" className="small" style={{ color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>All reports</Link>} gap={0}>
+            {reports.slice(0, 5).map((r) => (
+              <Link key={r.id} to={`/reports?id=${r.id}`} className="list-row">
+                {r.about.photo ? <Avatar src={r.about.photo} size={44} /> : <Logo initials={r.about.initials ?? '?'} color={r.about.color ?? '#5E6670'} size={44} />}
+                <span className="grow">
+                  <span className="t">{r.reason}</span>
+                  <span className="s">
+                    {r.about.name} · {r.age}
+                  </span>
+                </span>
+              </Link>
             ))}
-          </div>
-          <div className="two" style={{ gap: 8 }}>
-            {metrics.revenue.map((r) => (
-              <div key={r.label} style={{ background: 'var(--back)', borderRadius: 14, padding: '10px 12px' }}>
-                <div className="small muted">{r.label}</div>
-                <div className="strong" style={{ fontSize: 16, marginTop: 2 }}>
-                  {r.value}
+          </Card>
+        </div>
+        {/* Phones have no sidebar: messaging lives here. */}
+        <div className="hide-d">
+          <Card title="Messaging" gap={0}>
+            <QueueLink to="/push" icon="notification" title="Push notifications" sub="To phones with notifications on" />
+            <QueueLink to="/email" icon="mail" title="Email campaigns" sub="To everyone with an address" />
+          </Card>
+        </div>
+      </Section>
+
+      <Section id="growth" title="Growth" sub="Sign-ups, hiring and money">
+        <div className="ov-row r21">
+          <Card title="Sign-ups per day" right={muted(period)}>
+            <LineChart
+              labels={labels}
+              series={[
+                { name: 'Job seekers', color: 'var(--primary)', values: slice(metrics.signups.seekers) },
+                { name: 'Companies', color: '#FF8652', values: slice(metrics.signups.companies) },
+              ]}
+            />
+          </Card>
+          <Card title="Hiring funnel" right={muted('30 days')}>
+            {metrics.funnel.map((f) => (
+              <div className="funnel-step" key={f.label}>
+                <div className="row" style={{ justifyContent: 'space-between' }}>
+                  <span className="small muted" style={{ fontWeight: 600 }}>
+                    {f.label}
+                  </span>
+                  <span className="small muted">{f.share}</span>
+                </div>
+                <div className="funnel-bar" style={{ width: `${f.width}%`, opacity: 0.55 + f.width / 220 }}>
+                  {f.value}
                 </div>
               </div>
             ))}
-          </div>
-        </Card>
-      </div>
+          </Card>
+        </div>
+        <div className="ov-row r3">
+          <Card title="Plans and revenue" right={muted(`${(((p.premium + p.max) / (p.free + p.premium + p.max)) * 100).toFixed(1)}% of seekers pay`)}>
+            <div className="col" style={{ gap: 0 }}>
+              {[
+                [<span className="row" key="f"><span className="tier" style={{ width: 18, height: 18, background: 'var(--back-darker)' }} />Free</span>, p.free],
+                [<span className="row" key="p"><TierBadge tier="premium" />Seeker Premium</span>, p.premium],
+                [<span className="row" key="m"><TierBadge tier="max" />Seeker Max</span>, p.max],
+                [<span className="row" key="e"><Icon name="building" size={18} />Employer Premium</span>, p.employerPremium],
+              ].map(([k, v], i) => (
+                <div className="kv-row" key={i}>
+                  <span style={{ color: 'var(--text-headline)', fontWeight: 600 }}>{k}</span>
+                  <span>{Number(v).toLocaleString('en').replace(',', ' ')}</span>
+                </div>
+              ))}
+            </div>
+            <div className="two" style={{ gap: 8 }}>
+              {metrics.revenue.map((r) => (
+                <div key={r.label} style={{ background: 'var(--back)', borderRadius: 14, padding: '10px 12px' }}>
+                  <div className="small muted">{r.label}</div>
+                  <div className="strong" style={{ fontSize: 16, marginTop: 2 }}>
+                    {r.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+          <Card title="Live vacancies by field">
+            {metrics.fields.map(([f, v]) => (
+              <div className="hbar" key={f}>
+                <span style={{ width: 92, flex: 'none' }}>{f}</span>
+                <span className="track">
+                  <span style={{ width: `${(v / fieldMax) * 100}%` }} />
+                </span>
+                <span className="strong" style={{ width: 48, textAlign: 'right' }}>
+                  {v.toLocaleString('en').replace(',', ' ')}
+                </span>
+              </div>
+            ))}
+            <span className="small muted" style={{ marginTop: 6, fontWeight: 600 }}>
+              Job seekers by city
+            </span>
+            {metrics.cities.map(([c, v]) => (
+              <div className="hbar" key={c}>
+                <span style={{ width: 92, flex: 'none' }}>{c}</span>
+                <span className="track">
+                  <span style={{ width: `${(v / cityTotal) * 100}%`, background: '#FF8652' }} />
+                </span>
+                <span className="strong" style={{ width: 48, textAlign: 'right' }}>
+                  {Math.round((v / cityTotal) * 100)}%
+                </span>
+              </div>
+            ))}
+          </Card>
+          <Card title="New vacancies" right={<Link to="/vacancies" className="small" style={{ color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>All vacancies</Link>} gap={0}>
+            {vacancies.slice(0, 6).map((v) => (
+              <Link key={v.id} to={`/vacancies/${v.id}`} className="list-row">
+                <img src={v.photos[0]} alt="" style={{ width: 44, height: 44, borderRadius: 12, objectFit: 'cover' }} />
+                <span className="grow">
+                  <span className="t">{v.title}</span>
+                  <span className="s">
+                    {v.pay} {v.payNote.split('·')[0]}
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </Card>
+        </div>
+      </Section>
 
-      <div className="dash3">
-        <Card title="Job seekers by city">
-          {metrics.cities.map(([c, v]) => (
-            <div className="hbar" key={c}>
-              <span style={{ width: 92, flex: 'none' }}>{c}</span>
-              <span className="track">
-                <span style={{ width: `${(v / cityTotal) * 100}%`, background: '#FF8652' }} />
+      <Section id="traffic" title="Traffic and engagement" sub="Who comes, from where, and whether they come back">
+        <div className="kpis">
+          {t.kpis.map((k) => (
+            <div key={k.key} className="kpi">
+              <span className="small muted" style={{ fontWeight: 600 }}>
+                {k.label}
               </span>
-              <span className="strong" style={{ width: 48, textAlign: 'right' }}>
-                {Math.round((v / cityTotal) * 100)}%
+              <span className="kpi-v">{k.value}</span>
+              <span className="row" style={{ gap: 6 }}>
+                <span className={`delta ${k.trend}`}>{k.delta}</span>
+                <span className="small light">{k.sub}</span>
               </span>
             </div>
           ))}
-        </Card>
-        <Card title="New vacancies" right={<Link to="/vacancies" className="small" style={{ color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>All vacancies</Link>} gap={0}>
-          {vacancies.slice(0, 4).map((v) => (
-            <Link key={v.id} to={`/vacancies/${v.id}`} className="list-row">
-              <img src={v.photos[0]} alt="" style={{ width: 44, height: 44, borderRadius: 12, objectFit: 'cover' }} />
-              <span className="grow">
-                <span className="t">{v.title}</span>
-                <span className="s">
-                  {v.pay} {v.payNote.split('·')[0]}
+        </div>
+        <div className="ov-row r21">
+          <Card title="Visits and active people" right={muted(period)}>
+            <LineChart
+              label="Visits and active people per day"
+              labels={tLabels}
+              series={[
+                { name: 'Active people (apps and web)', color: 'var(--primary)', values: slice(t.daily.active) },
+                { name: 'Web visits', color: '#FF8652', values: slice(t.daily.visits) },
+              ]}
+            />
+          </Card>
+          <Card title="Activity by hour" right={muted('Dubai time · 7-day avg')}>
+            <Hours values={t.hours} />
+          </Card>
+        </div>
+        <div className="ov-row r3">
+          <Card title="Where people come from" right={muted('30 days')}>
+            <HBars rows={t.sources} />
+          </Card>
+          <Card title="Platforms and countries" right={muted('share of sessions')}>
+            <div className="stack-bar" style={{ height: 14 }}>
+              {t.platforms.map(([k, v], i) => (
+                <span key={k} style={{ width: `${v}%`, background: pc[i][1] }} />
+              ))}
+            </div>
+            <div className="legend" style={{ flexWrap: 'wrap' }}>
+              {t.platforms.map(([k, v], i) => (
+                <span key={k}>
+                  <i style={{ background: pc[i][1] }} />
+                  {k} <b style={{ color: 'var(--text-headline)', marginLeft: 4 }}>{v}%</b>
                 </span>
-              </span>
-            </Link>
-          ))}
-        </Card>
-        <Card title="Latest reports" right={<Link to="/reports" className="small" style={{ color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>All reports</Link>} gap={0}>
-          {reports.slice(0, 4).map((r) => (
-            <Link key={r.id} to={`/reports?id=${r.id}`} className="list-row">
-              {r.about.photo ? <Avatar src={r.about.photo} size={44} /> : <Logo initials={r.about.initials ?? '?'} color={r.about.color ?? '#5E6670'} size={44} />}
-              <span className="grow">
-                <span className="t">{r.reason}</span>
-                <span className="s">
-                  {r.about.name} · {r.age}
+              ))}
+            </div>
+            <HBars rows={t.countries} color="#7A3FD1" />
+          </Card>
+          <Card title="Most viewed screens" right={muted('today · avg time')} gap={0}>
+            {t.screens.map((sc, i) => (
+              <div key={sc.name} className="list-row">
+                <span className="rank">{i + 1}</span>
+                <span className="grow">
+                  <span className="t">{sc.name}</span>
+                  <span className="s">{sc.views} views</span>
                 </span>
-              </span>
-            </Link>
-          ))}
+                <span className="small muted" style={{ whiteSpace: 'nowrap' }}>
+                  {sc.time}
+                </span>
+              </div>
+            ))}
+          </Card>
+        </div>
+        <Card title="Retention" right={muted('share of each weekly sign-up cohort that came back')}>
+          <Retention rows={t.retention} />
         </Card>
-      </div>
+      </Section>
     </>
   );
 }

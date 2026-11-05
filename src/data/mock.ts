@@ -532,6 +532,8 @@ export const metrics: Metrics = {
       web: 56,
       seekers: 291,
       employers: 56,
+      peakToday: { value: 412, at: '20:14' },
+      lastWeek: 318,
       perMinute: [298, 305, 311, 302, 296, 309, 318, 322, 315, 308, 312, 320, 331, 326, 319, 324, 333, 338, 330, 327, 335, 342, 339, 331, 336, 344, 351, 343, 340, 347],
     },
     kpis: [
